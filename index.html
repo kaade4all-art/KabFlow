@@ -3086,12 +3086,42 @@ ${await customerOptions()}
 
 +
 
-field(
-"Method",
-"f3",
-"text",
-"Cash, transfer, card"
-)
+`
+<div class="formrow">
+
+<label for="f3">
+Payment Method
+</label>
+
+<select
+id="f3"
+class="input"
+>
+
+<option value="Cash">
+Cash
+</option>
+
+<option value="Bank Transfer">
+Bank Transfer
+</option>
+
+<option value="POS">
+POS
+</option>
+
+<option value="Card">
+Card
+</option>
+
+<option value="Other">
+Other
+</option>
+
+</select>
+
+</div>
+`
 
 +
 
@@ -3801,6 +3831,7 @@ location.reload();
 );
 
 </script>
+</html>
 
 </body>
 </html>

@@ -1,241 +1,170 @@
- <!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KabFlow Phase 2</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KabFlow</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#eef5ff;color:#142f52}.hidden{display:none!important}
-.auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 20px;background:radial-gradient(circle at 15% 20%,#176fd5 0,#0b3e91 38%,#062b68 100%);position:relative;overflow:hidden}.auth:before,.auth:after{content:"";position:absolute;border-radius:50%;border:90px solid rgba(255,255,255,.045);pointer-events:none}.auth:before{width:620px;height:620px;right:-300px;top:-280px}.auth:after{width:700px;height:700px;left:-410px;bottom:-390px}
-.authbox{position:relative;z-index:1;background:#fff;width:min(730px,100%);padding:42px 40px 34px;border-radius:22px;box-shadow:0 25px 70px rgba(0,0,0,.25)}.authbrand{text-align:center}.brand{font-size:50px;line-height:1;font-weight:800;letter-spacing:-2px;color:#0d315b}.brand span{color:#d1a52c}.tagline{text-align:center;color:#596b82;font-size:17px;margin:10px 0 32px}
-.authpanel{border:1px solid #e2e8f0;border-radius:14px;padding:28px 30px 24px;box-shadow:0 2px 10px rgba(13,35,64,.04)}.authpanel h1{margin:0 0 8px;color:#102f55;font-size:29px}.authpanel .intro{margin:0 0 22px;color:#66778d;font-size:15px;line-height:1.5}.formrow{margin-bottom:14px}.formrow label{display:block;font-size:14px;font-weight:700;color:#183454;margin-bottom:7px}.fieldwrap{position:relative}.input{width:100%;padding:14px 15px;border:1px solid #cfd9e5;border-radius:9px;background:#fff;color:#183454;font-size:15px;outline:none}.input:focus{border-color:#2c70c9;box-shadow:0 0 0 3px rgba(44,112,201,.1)}.iconfield .input{padding-left:48px}.fieldicon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#5e7086;font-size:19px}.passwrap .input{padding-right:70px}.showpass{position:absolute;right:8px;top:5px;border:0;background:none;color:#0b4bb1;cursor:pointer;padding:9px 8px;font-size:14px;font-weight:700}.authbtn{width:100%;border:0;border-radius:9px;padding:14px 16px;background:#d1a52c;color:#102f55;cursor:pointer;font-size:16px;font-weight:800;margin-top:4px}.authbtn:hover{background:#c29821}.legal{text-align:center;color:#718097;font-size:11px;line-height:1.5;margin:14px 8px 0}.legal a,.authswitch a{color:#0b4bb1;text-decoration:underline;cursor:pointer}.authswitch{text-align:center;color:#687990;font-size:15px;margin:25px 0 0}.authswitch button{border:0;background:none;color:#0b4bb1;text-decoration:underline;cursor:pointer;font-size:15px;padding:0}.forgot{text-align:right;margin-top:8px}.forgot button{border:0;background:none;color:#0b4bb1;cursor:pointer;font-size:13px;padding:0}.msg{margin:14px 0 0;padding:10px 12px;border-radius:8px;background:#fff4d6;color:#6d5200;font-size:13px}.authfooter{text-align:center;color:#66778d;font-size:13px;margin-top:25px}.authfooter .line{margin-bottom:10px}
-.setup{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:25px;background:linear-gradient(135deg,#0d2340 0%,#1267d6 60%,#2f80ed 100%)}.setupbox{width:min(620px,100%);background:#fff;border-radius:20px;padding:32px;box-shadow:0 18px 50px #061a3333}.setupbox h1{margin-top:0;color:#0d2340}.setupgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}.setupbox .input,.setupbox select{width:100%;padding:12px;margin:7px 0 13px;border:1px solid #d5dce3;border-radius:9px;background:#fff}.setupbox .full{grid-column:1/-1}
-.app{min-height:100vh}.side{position:fixed;left:0;top:0;bottom:0;width:235px;background:#0d2340;color:#fff;padding:22px 14px}.side .brand{color:#fff;margin-bottom:25px;padding-left:10px}.nav button{width:100%;border:0;background:none;color:#dce6f0;text-align:left;padding:12px;border-radius:8px;margin:3px 0;cursor:pointer}.nav button:hover,.nav button.active{background:#183a61;color:#fff}.main{margin-left:235px;padding:28px;background:#eef5ff;min-height:100vh}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.card,.panel{background:#fff;border-radius:14px;padding:18px;box-shadow:0 2px 10px #0d234010}.stat{font-size:27px;font-weight:800;margin:8px 0}.section{margin-top:22px}.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.screen{display:none}.screen.active{display:block}.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}.table th,.table td{padding:13px;text-align:left;border-bottom:1px solid #edf0f2;font-size:13px}.badge{font-size:11px;padding:5px 8px;border-radius:20px;background:#e6f7f0;color:#08745f}.danger{background:#fde8e8;color:#a32929}.warn{background:#fff2d8;color:#976000}.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}.box{background:#fff;width:min(520px,100%);padding:25px;border-radius:15px;max-height:90vh;overflow:auto}.close{float:right;border:0;background:none;font-size:25px;cursor:pointer}.actions{display:flex;gap:8px;flex-wrap:wrap}.textarea{min-height:90px;resize:vertical}.voice{display:flex;gap:8px;align-items:center;margin:10px 0}.recording{color:#a32929;font-weight:700}
-@media(max-width:700px){.auth{padding:16px}.authbox{padding:30px 18px 25px;border-radius:18px}.brand{font-size:40px}.tagline{font-size:15px;margin-bottom:24px}.authpanel{padding:22px 18px 20px}.authpanel h1{font-size:25px}.setupgrid{grid-template-columns:1fr}.setupbox .full{grid-column:auto}.side{width:70px}.side .brand{font-size:0}.side .brand:after{content:'K';font-size:28px}.nav button{font-size:0;text-align:center}.main{margin-left:70px;padding:18px}.grid{grid-template-columns:repeat(2,1fr)}.top{align-items:flex-start;gap:10px}}
- body > div:first-child{
-  position:fixed;
-  top:24px;
-  left:0;
-  right:0;
-  z-index:10;
-}
-
-body > div:first-child > div:last-child{
-  position:fixed;
-  bottom:12px;
-  left:0;
-  right:0;
-  margin:0 !important;
-  text-align:center;
-  z-index:10;
-}
-
-@media(max-width:700px){
-  body > div:first-child{
-    top:14px;
-  }
-}
- 
- </style>
+:root{--navy:#082d62;--navy2:#061f45;--blue:#0b63ce;--gold:#c79a2b;--gold2:#e0b84c;--ink:#102a4c;--muted:#65758b;--line:#dfe6ef;--bg:#f5f8fc;--white:#fff;--danger:#b42318;--success:#087443}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg)}button,input,select,textarea{font:inherit}button{cursor:pointer}
+.hidden{display:none!important}
+/* Authentication */
+.auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:34px 18px;background:radial-gradient(circle at 18% 20%,#1166c5 0,#0a438e 32%,#06234c 72%,#031a39 100%);position:relative;overflow:hidden}
+.auth:before,.auth:after{content:"";position:absolute;border:1px solid rgba(255,255,255,.09);border-radius:50%;pointer-events:none}.auth:before{width:760px;height:760px;left:-480px;bottom:-420px}.auth:after{width:900px;height:900px;right:-560px;top:-560px}
+.auth-card{width:min(560px,100%);background:rgba(255,255,255,.98);border-radius:22px;box-shadow:0 28px 70px rgba(0,0,0,.28);padding:34px 36px 28px;position:relative;z-index:1}
+.brand-lockup{text-align:center;margin-bottom:24px}.brand-mark{display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:16px;background:linear-gradient(145deg,#e2b94d,#ad7e13);box-shadow:0 8px 20px rgba(180,135,30,.22);margin-bottom:10px}.brand-mark svg{width:40px;height:40px}.brand-name{font-size:42px;font-weight:800;letter-spacing:-2px;color:var(--navy);line-height:1}.brand-name span{color:var(--gold)}.tagline{margin-top:9px;color:#5c6f88;font-size:15px}
+.auth-panel{border:1px solid #e1e8f0;border-radius:15px;padding:25px 25px 21px;background:#fff}.auth-panel h1{margin:0;font-size:28px;letter-spacing:-.6px}.intro{margin:8px 0 22px;color:var(--muted);line-height:1.45}.formrow{margin-bottom:15px}.formrow label,.setupbox label{display:block;font-weight:650;font-size:13px;margin:0 0 7px}.fieldwrap{position:relative}.input{width:100%;border:1px solid #cfd9e5;border-radius:9px;background:#fff;padding:12px 13px;outline:none;color:var(--ink);transition:.15s}.input:focus{border-color:#5c93d6;box-shadow:0 0 0 3px rgba(11,99,206,.10)}.iconfield .input{padding-left:43px}.fieldicon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#60738a;font-size:18px;z-index:2}.passwrap .input{padding-right:65px}.showpass{position:absolute;right:7px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--navy);font-weight:700;padding:7px}.forgot{text-align:right;margin-top:-4px;margin-bottom:13px}.linkbtn,.forgot button{border:0;background:none;color:#0757bb;text-decoration:underline;padding:0;font-weight:650}.authbtn{width:100%;border:0;border-radius:9px;background:linear-gradient(180deg,#d6a92f,#bd8d1f);color:#082d62;font-weight:800;padding:13px 16px;box-shadow:0 7px 14px rgba(174,127,22,.16)}.authbtn:disabled{opacity:.65;cursor:wait}.legal{font-size:11.5px;color:#68798d;text-align:center;margin-top:12px;line-height:1.5}.legal a{color:#0757bb}.authswitch{text-align:center;margin:20px 0 14px;color:#61738a}.authswitch button{border:0;background:none;color:#0757bb;text-decoration:underline;font-weight:700}.authfooter{text-align:center;color:#718198;font-size:12px;line-height:1.7}.authfooter .line{margin-bottom:4px;font-size:13px}.message{margin-top:13px;padding:10px 12px;border-radius:8px;background:#eef5ff;color:#23476f;font-size:13px}.message.error{background:#fff0ef;color:var(--danger)}.message.success{background:#edf9f3;color:var(--success)}
+/* Setup */
+.setup{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px 18px;background:linear-gradient(135deg,#eaf3ff,#f8fbff)}.setupbox{width:min(720px,100%);background:#fff;border-radius:20px;box-shadow:0 20px 55px rgba(21,52,92,.14);padding:30px}.setuphead{display:flex;gap:14px;align-items:center;margin-bottom:22px}.setuphead .mini-mark{width:50px;height:50px;border-radius:13px;background:var(--navy);display:grid;place-items:center}.setuphead svg{width:34px}.setuphead h1{margin:0;font-size:26px}.setupgrid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.setupgrid .full{grid-column:1/-1}.setup-actions{margin-top:20px}.btn{border:1px solid #cbd7e5;border-radius:9px;padding:10px 14px;background:#fff;color:var(--navy);font-weight:700}.btn:hover{background:#f5f8fc}.btn.gold{border-color:#c69a31;background:var(--gold);color:#092d60}.btn.danger{color:var(--danger);border-color:#efc3bf}.btn.small{padding:7px 10px;font-size:12px}
+/* App */
+.app{min-height:100vh}.appbar{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 24px}.appbrand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:23px}.appbrand .mark{width:36px;height:36px;border-radius:10px;background:var(--navy);display:grid;place-items:center}.appbrand svg{width:26px}.appbrand span{color:var(--gold)}.business-pill{font-size:13px;color:#53677f}.app-actions{display:flex;gap:8px;align-items:center}.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 68px)}.sidebar{background:#072b5d;color:#dbe9fa;padding:20px 12px}.navbtn{width:100%;text-align:left;border:0;background:transparent;color:#dbe9fa;border-radius:9px;padding:11px 13px;margin-bottom:4px;font-weight:600}.navbtn:hover,.navbtn.active{background:rgba(255,255,255,.11);color:#fff}.navsection{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:#90add0;margin:14px 12px 7px}.main{padding:26px;min-width:0}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.top h1{margin:0;font-size:27px;letter-spacing:-.5px}.screen{display:none}.screen.active{display:block}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:0 5px 15px rgba(23,55,91,.045)}.card{padding:18px}.stat{font-size:27px;font-weight:800;margin-top:8px}.muted{color:var(--muted)}.section{padding:18px;margin-top:16px}.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.sectionhead h2{margin:0;font-size:19px}.actions{display:flex;gap:8px;flex-wrap:wrap}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:11px;background:#fff}.table{width:100%;border-collapse:collapse;min-width:600px}.table th,.table td{padding:12px 13px;border-bottom:1px solid #edf1f5;text-align:left;font-size:13px}.table th{background:#f8fafc;color:#51657e;font-size:11px;text-transform:uppercase;letter-spacing:.6px}.table tr:last-child td{border-bottom:0}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef4fb;color:#315274;font-size:11px;font-weight:700}.badge.danger{background:#fff0ef;color:var(--danger)}.badge.success{background:#edf9f3;color:var(--success)}.empty{padding:28px;text-align:center;color:#72839a}.row-actions{display:flex;gap:6px;flex-wrap:wrap}.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.insight-value{font-size:24px;font-weight:800;margin-top:6px}
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(2,18,39,.48);display:none;align-items:center;justify-content:center;padding:18px;z-index:50}.modal.show{display:flex}.modalbox{background:#fff;border-radius:16px;width:min(560px,100%);max-height:90vh;overflow:auto;padding:24px}.modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}.modalhead h2{margin:0;font-size:20px}.close{border:0;background:transparent;font-size:25px;color:#63758a}.modalform .formrow{margin-bottom:13px}.modalform .btn{margin-top:5px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{display:flex;gap:5px;overflow:auto;padding:8px;position:sticky;top:68px;z-index:10}.navsection{display:none}.navbtn{width:auto;white-space:nowrap;margin:0;padding:9px 11px}.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.auth{padding:18px 12px}.auth-card{padding:25px 15px 22px;border-radius:18px}.auth-panel{padding:20px 16px}.brand-name{font-size:36px}.auth-panel h1{font-size:24px}.setup{padding:15px}.setupbox{padding:22px 17px}.setupgrid{grid-template-columns:1fr}.setupgrid .full{grid-column:auto}.appbar{padding:0 14px}.business-pill{display:none}.main{padding:18px 12px}.top h1{font-size:23px}.grid{grid-template-columns:1fr 1fr}.insight-grid{grid-template-columns:1fr}.app-actions .btn:first-child{display:none}}
+</style>
 </head>
 <body>
-<div style="text-align:center;margin-bottom:18px;">
-  <div style="display:inline-flex;align-items:center;gap:12px;">
-    <svg width="54" height="54" viewBox="0 0 54 54" xmlns="http://www.w3.org/2000/svg" aria-label="KabFlow logo">
-      <rect x="2" y="2" width="50" height="50" rx="12" fill="#0B2A55"/>
-      <path d="M16 14V40" stroke="#D4A62A" stroke-width="6" stroke-linecap="round"/>
-      <path d="M16 27L35 14" stroke="#D4A62A" stroke-width="6" stroke-linecap="round"/>
-      <path d="M24 27L37 40" stroke="#D4A62A" stroke-width="6" stroke-linecap="round"/>
-      <path d="M31 33L42 22" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M37 22H42V27" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-
-    <div style="font-size:38px;font-weight:800;letter-spacing:-1px;color:#0B2A55;">
-      Kab<span style="color:#D4A62A;">Flow</span>
-    </div>
-  </div>
-
-  <div style="font-size:14px;color:#64748B;margin-top:7px;">
-    Organize your WhatsApp business in one place.
-  </div>
-
-  <div style="font-size:12px;color:#64748B;margin-top:8px;">
-    © 2026 KabFlow. All rights reserved.
-  </div>
 
 <div id="auth" class="auth">
-  <div class="authbox">
-    
-      <h1 id="authTitle">Create your account</h1><p id="authIntro" class="intro">Get started and manage your customers, orders, payments and follow ups easily.</p>
-      <div id="nameRow" class="formrow"><label>Full name</label><div class="fieldwrap iconfield"><span class="fieldicon">♙</span><input id="fullName" class="input" type="text" autocomplete="name" placeholder="Enter your full name"></div></div>
-      <div class="formrow"><label>Email address</label><div class="fieldwrap iconfield"><span class="fieldicon">✉</span><input id="email" class="input" type="email" autocomplete="email" placeholder="Enter your email address"></div></div>
-      <div class="formrow"><label>Password</label><div class="fieldwrap passwrap"><span class="fieldicon">▢</span><input id="password" class="input" type="password" autocomplete="new-password" placeholder="Create a password"><button class="showpass" onclick="togglePassword(event)">Show</button></div></div>
-      <div id="confirmWrap" class="formrow"><label>Confirm password</label><div class="fieldwrap"><input id="confirmPassword" class="input" type="password" placeholder="Confirm your password"></div></div>
-      <div id="forgotRow" class="forgot hidden"><button onclick="forgotPassword()">Forgot password?</button></div>
-      <button id="authBtn" class="authbtn" onclick="submitAuth()">Create account</button>
+  <div class="auth-card">
+    <div class="brand-lockup">
+      <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><path d="M18 10v44M18 32l27-22M18 32l27 22" stroke="#082d62" stroke-width="8" stroke-linecap="round"/><path d="M11 39c8 7 18 9 28 5 9-4 15-11 16-21" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M48 18l8 5-8 5" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="brand-name">Kab<span>Flow</span></div>
+      <div class="tagline">Organize your WhatsApp business in one place.</div>
+    </div>
+    <div class="auth-panel">
+      <h1 id="authTitle">Create your account</h1>
+      <p id="authIntro" class="intro">Get started and manage your customers, orders, payments and follow ups easily.</p>
+      <div id="nameRow" class="formrow"><label for="fullName">Full name</label><div class="fieldwrap iconfield"><span class="fieldicon">♙</span><input id="fullName" class="input" type="text" autocomplete="name" placeholder="Enter your full name"></div></div>
+      <div class="formrow"><label for="email">Email address</label><div class="fieldwrap iconfield"><span class="fieldicon">✉</span><input id="email" class="input" type="email" autocomplete="email" placeholder="Enter your email address"></div></div>
+      <div class="formrow"><label for="password">Password</label><div class="fieldwrap passwrap"><span class="fieldicon">▢</span><input id="password" class="input" type="password" autocomplete="new-password" placeholder="Create a password"><button class="showpass" id="showPassBtn" type="button" onclick="togglePassword()">Show</button></div></div>
+      <div id="confirmWrap" class="formrow"><label for="confirmPassword">Confirm password</label><div class="fieldwrap"><input id="confirmPassword" class="input" type="password" autocomplete="new-password" placeholder="Confirm your password"></div></div>
+      <div id="forgotRow" class="forgot hidden"><button type="button" onclick="forgotPassword()">Forgot password?</button></div>
+      <button id="authBtn" class="authbtn" type="button" onclick="submitAuth()">Create account</button>
       <div id="legalText" class="legal">By creating an account, you agree to our <a href="#" onclick="return false">Terms of Service</a> and <a href="#" onclick="return false">Privacy Policy</a>.</div>
       <div id="authMsg"></div>
     </div>
-    <div class="authswitch"><span id="switchText">Already have an account?</span> <button id="switchBtn" onclick="setAuthMode('login')">Sign in</button></div>
+    <div class="authswitch"><span id="switchText">Already have an account?</span> <button id="switchBtn" type="button" onclick="toggleAuthMode()">Sign in</button></div>
     <div class="authfooter"><div class="line">Manage customers. Track orders. Grow your business.</div>© <span id="currentYear"></span> KabFlow. All rights reserved.</div>
   </div>
 </div>
 
 <div id="setup" class="setup hidden">
   <div class="setupbox">
-    <div class="brand">Kab<span>Flow</span></div>
-    <h1>Welcome to KabFlow</h1>
-    <p class="muted">Tell us about yourself and your business.</p>
+    <div class="setuphead"><div class="mini-mark"><svg viewBox="0 0 64 64" fill="none"><path d="M18 10v44M18 32l27-22M18 32l27 22" stroke="#e0b84c" stroke-width="8" stroke-linecap="round"/><path d="M11 39c8 7 18 9 28 5 9-4 15-11 16-21" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></div><div><h1>Set up your business</h1><div class="muted">Complete your profile before entering KabFlow.</div></div></div>
     <div class="setupgrid">
-      <div><label>Full Name</label><input id="sFullName" class="input" type="text" autocomplete="name"></div>
-      <div><label>Email Address</label><input id="sEmail" class="input" type="email" readonly></div>
-      <div><label>Business Name</label><input id="sBusinessName" class="input" type="text"></div>
-      <div><label>Phone Number</label><input id="sPhone" class="input" type="tel" autocomplete="tel"></div>
-      <div class="full"><label>Business Address</label><input id="sAddress" class="input" type="text" autocomplete="street-address"></div>
-      <div class="full"><label>Business Type</label><select id="sBusinessType" class="input"><option value="">Select business type</option><option>Fashion</option><option>Food and catering</option><option>Beauty and cosmetics</option><option>Electronics</option><option>Retail</option><option>Wholesale</option><option>Services</option><option>Real estate</option><option>Education</option><option>Other</option></select></div>
+      <div><label for="sFullName">Full name</label><input id="sFullName" class="input" type="text"></div>
+      <div><label for="sEmail">Email address</label><input id="sEmail" class="input" type="email" readonly></div>
+      <div><label for="sBusinessName">Business name</label><input id="sBusinessName" class="input" type="text"></div>
+      <div><label for="sPhone">Phone number</label><input id="sPhone" class="input" type="tel"></div>
+      <div class="full"><label for="sAddress">Business address</label><input id="sAddress" class="input" type="text"></div>
+      <div class="full"><label for="sBusinessType">Business type</label><select id="sBusinessType" class="input"><option value="">Select business type</option><option>Fashion</option><option>Food and catering</option><option>Beauty and cosmetics</option><option>Electronics</option><option>Retail</option><option>Wholesale</option><option>Services</option><option>Real estate</option><option>Education</option><option>Other</option></select></div>
     </div>
-    <div id="setupMsg"></div>
-    <button class="btn" style="width:100%;margin-top:8px" onclick="saveBusinessSetup()">Save and Continue</button>
+    <div id="setupMsg"></div><div class="setup-actions"><button class="btn gold" style="width:100%" onclick="saveBusinessSetup()">Save and Continue</button></div>
   </div>
 </div>
 
 <div id="app" class="app hidden">
-<aside class="side">
-  <div class="brand">Kab<span>Flow</span></div>
-  <div class="nav">
-    <button class="active" onclick="show('dashboard',this)">Dashboard</button>
-    <button onclick="show('customers',this)">Customers</button>
-    <button onclick="show('orders',this)">Orders</button>
-    <button onclick="show('followups',this)">Follow Ups</button>
-    <button onclick="show('tasks',this)">Tasks</button>
-    <button onclick="show('sales',this)">Payments</button>
-    <button onclick="show('invoices',this)">Invoices</button>
-    <button onclick="show('team',this)">Team</button>
-    <button onclick="signOut()">Sign out</button>
+  <header class="appbar">
+    <div class="appbrand"><div class="mark"><svg viewBox="0 0 64 64" fill="none"><path d="M18 10v44M18 32l27-22M18 32l27 22" stroke="#e0b84c" stroke-width="8" stroke-linecap="round"/><path d="M11 39c8 7 18 9 28 5 9-4 15-11 16-21" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></div><div>Kab<span>Flow</span></div></div>
+    <div id="businessName" class="business-pill">KabFlow</div>
+    <div class="app-actions"><button class="btn small" onclick="startVoice()" id="voiceBtn">Voice note</button><button class="btn small" onclick="signOut()">Sign out</button></div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="navsection">Workspace</div>
+      <button class="navbtn active" onclick="showScreen('dashboard',this)">Dashboard</button>
+      <button class="navbtn" onclick="showScreen('customers',this)">Customers</button>
+      <button class="navbtn" onclick="showScreen('orders',this)">Orders</button>
+      <button class="navbtn" onclick="showScreen('followups',this)">Follow Ups</button>
+      <button class="navbtn" onclick="showScreen('tasks',this)">Tasks</button>
+      <button class="navbtn" onclick="showScreen('payments',this)">Payments</button>
+      <button class="navbtn" onclick="showScreen('invoices',this)">Invoices</button>
+      <button class="navbtn" onclick="showScreen('sales',this)">Sales Insights</button>
+      <button class="navbtn" onclick="showScreen('team',this)">Team</button>
+    </aside>
+    <main class="main">
+      <div class="top"><h1 id="title">Dashboard</h1><span class="muted" id="userEmail"></span></div>
+      <section id="dashboard" class="screen active"></section>
+      <section id="customers" class="screen"></section>
+      <section id="orders" class="screen"></section>
+      <section id="followups" class="screen"></section>
+      <section id="tasks" class="screen"></section>
+      <section id="payments" class="screen"></section>
+      <section id="invoices" class="screen"></section>
+      <section id="sales" class="screen"></section>
+      <section id="team" class="screen"></section>
+    </main>
   </div>
-</aside>
-<main class="main">
-<div class="top"><h1 id="title">Dashboard</h1><span id="businessName" class="muted">KabFlow</span></div>
-<section id="dashboard" class="screen active"></section>
-<section id="customers" class="screen"></section>
-<section id="orders" class="screen"></section>
-<section id="followups" class="screen"></section>
-<section id="tasks" class="screen"></section>
-<section id="sales" class="screen"></section>
-<section id="invoices" class="screen"></section>
-<section id="team" class="screen"></section>
-</main></div>
+</div>
 
-<div id="modal" class="modal"><div class="box"><button class="close" onclick="closeModal()">×</button><h2 id="mtitle"></h2><div id="mbody"></div></div></div>
+<div id="modal" class="modal"><div class="modalbox"><div class="modalhead"><h2 id="modalTitle"></h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
+
 <script>
-document.getElementById("currentYear").textContent=new Date().getFullYear();
 const SUPABASE_URL="https://jlzcvtpvgvhmzgfnrovr.supabase.co";
 const SUPABASE_KEY="sb_publishable_tZK_j7orO13jGpYzCt7BIQ_hRhQUEz8";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let mode="signup", business=null, mediaRecorder=null, audioChunks=[];
+let authMode="signup",business=null,currentUser=null,mediaRecorder=null,audioChunks=[];
 
-function msg(t){document.getElementById("authMsg").innerHTML='<div class="msg">'+t+'</div>'}
-function setAuthMode(m){mode=m;document.getElementById("authTitle").textContent=m==="login"?"Sign in to KabFlow":"Create your account";document.getElementById("authIntro").textContent=m==="login"?"Welcome back. Sign in to manage your business in one place.":"Get started and manage your customers, orders, payments and follow ups easily.";document.getElementById("nameRow").classList.toggle("hidden",m!=="signup");document.getElementById("confirmWrap").classList.toggle("hidden",m!=="signup");document.getElementById("forgotRow").classList.toggle("hidden",m!=="login");document.getElementById("authBtn").textContent=m==="login"?"Sign in":"Create account";document.getElementById("legalText").classList.toggle("hidden",m!=="signup");document.getElementById("switchText").textContent=m==="login"?"New to KabFlow?":"Already have an account?";document.getElementById("switchBtn").textContent=m==="login"?"Create account":"Sign in";document.getElementById("switchBtn").onclick=function(){setAuthMode(m==="login"?"signup":"login")};document.getElementById("authMsg").innerHTML="";document.getElementById("password").setAttribute("autocomplete",m==="login"?"current-password":"new-password")}
-function togglePassword(e){let x=document.getElementById("password");x.type=x.type==="password"?"text":"password";e.currentTarget.textContent=x.type==="password"?"Show":"Hide"}
-async function submitAuth(){
- let email=document.getElementById("email").value.trim(), p=document.getElementById("password").value;
- if(!email||!p)return msg("Enter your email and password.");
- if(mode==="signup"){let c=document.getElementById("confirmPassword").value;if(p!==c)return msg("Passwords do not match.");let name=document.getElementById("fullName").value.trim();if(!name)return msg("Enter your full name.");let r=await sb.auth.signUp({email,password:p,options:{data:{full_name:name}}});if(r.error)return msg(r.error.message);msg("Account created. Check your email if confirmation is required, then sign in to complete your business setup.");}
- else {let r=await sb.auth.signInWithPassword({email,password:p});if(r.error)return msg(r.error.message);await boot();}
-}
-async function forgotPassword(){let e=document.getElementById("email").value.trim();if(!e)return msg("Enter your email first.");let r=await sb.auth.resetPasswordForEmail(e,{redirectTo:location.origin});if(r.error)return msg(r.error.message);msg("Password recovery email sent.")}
+document.getElementById("currentYear").textContent=new Date().getFullYear();
+function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function message(id,text,type=""){document.getElementById(id).innerHTML=text?`<div class="message ${type}">${esc(text)}</div>`:""}
+function authMessage(text,type=""){message("authMsg",text,type)}
+function toggleAuthMode(){setAuthMode(authMode==="signup"?"login":"signup")}
+function setAuthMode(mode){authMode=mode;document.getElementById("authTitle").textContent=mode==="login"?"Sign in to KabFlow":"Create your account";document.getElementById("authIntro").textContent=mode==="login"?"Welcome back. Sign in to manage your business in one place.":"Get started and manage your customers, orders, payments and follow ups easily.";document.getElementById("nameRow").classList.toggle("hidden",mode!=="signup");document.getElementById("confirmWrap").classList.toggle("hidden",mode!=="signup");document.getElementById("forgotRow").classList.toggle("hidden",mode!=="login");document.getElementById("legalText").classList.toggle("hidden",mode!=="signup");document.getElementById("authBtn").textContent=mode==="login"?"Sign in":"Create account";document.getElementById("switchText").textContent=mode==="login"?"New to KabFlow?":"Already have an account?";document.getElementById("switchBtn").textContent=mode==="login"?"Create account":"Sign in";document.getElementById("password").setAttribute("autocomplete",mode==="login"?"current-password":"new-password");authMessage("")}
+function togglePassword(){const p=document.getElementById("password"),b=document.getElementById("showPassBtn");p.type=p.type==="password"?"text":"password";b.textContent=p.type==="password"?"Show":"Hide"}
+async function submitAuth(){const btn=document.getElementById("authBtn");const email=document.getElementById("email").value.trim();const password=document.getElementById("password").value;if(!email||!password){authMessage("Enter your email and password.","error");return}btn.disabled=true;try{if(authMode==="signup"){const name=document.getElementById("fullName").value.trim(),confirm=document.getElementById("confirmPassword").value;if(!name){authMessage("Enter your full name.","error");return}if(password.length<6){authMessage("Password must be at least 6 characters.","error");return}if(password!==confirm){authMessage("Passwords do not match.","error");return}const r=await sb.auth.signUp({email,password,options:{data:{full_name:name}}});if(r.error){authMessage(r.error.message,"error");return}if(r.data.session){await boot()}else{authMessage("Account created. Check your email if confirmation is required, then use the Sign in link below.","success")}}else{const r=await sb.auth.signInWithPassword({email,password});if(r.error){authMessage(r.error.message,"error");return}await boot()}}finally{btn.disabled=false}}
+async function forgotPassword(){const email=document.getElementById("email").value.trim();if(!email){authMessage("Enter your email address first.","error");return}const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});if(r.error){authMessage(r.error.message,"error");return}authMessage("Password recovery email sent.","success")}
 async function signOut(){await sb.auth.signOut();location.reload()}
-async function boot(){
- document.getElementById("auth").classList.add("hidden");
- await loadBusiness();
- if(!business){document.getElementById("auth").classList.remove("hidden");return}
- const complete=Boolean(business.setup_complete && business.name && business.business_type && business.owner_name && business.phone);
- if(!complete){showBusinessSetup();return}
- document.getElementById("setup").classList.add("hidden");
- document.getElementById("app").classList.remove("hidden");
- document.getElementById("businessName").textContent=business.name;
- await renderAll();
-}
-async function loadBusiness(){
- const {data:{user}}=await sb.auth.getUser(); if(!user)return;
- let r=await sb.from("businesses").select("*").eq("owner_id",user.id).limit(1).maybeSingle();
- if(r.error){msg(r.error.message);return}
- if(r.data)business=r.data;
- else {
-   let ins=await sb.from("businesses").insert({owner_id:user.id,name:"My Business",currency:"₦",owner_email:user.email,setup_complete:false}).select().single();
-   if(ins.error){msg(ins.error.message);return}
-   business=ins.data;
- }
- document.getElementById("businessName").textContent=business?.name||"My Business";
-}
-async function showBusinessSetup(){
- const {data:{user}}=await sb.auth.getUser();
- document.getElementById("app").classList.add("hidden");
- document.getElementById("setup").classList.remove("hidden");
- document.getElementById("sEmail").value=business?.owner_email||user?.email||"";
- document.getElementById("sFullName").value=business?.owner_name||"";
- document.getElementById("sBusinessName").value=business?.name==="My Business"?"":(business?.name||"");
- document.getElementById("sAddress").value=business?.address||"";
- document.getElementById("sBusinessType").value=business?.business_type||"";
- document.getElementById("sPhone").value=business?.phone||"";
-}
-async function saveBusinessSetup(){
- const fullName=document.getElementById("sFullName").value.trim();
- const email=document.getElementById("sEmail").value.trim();
- const name=document.getElementById("sBusinessName").value.trim();
- const address=document.getElementById("sAddress").value.trim();
- const type=document.getElementById("sBusinessType").value;
- const phone=document.getElementById("sPhone").value.trim();
- const box=document.getElementById("setupMsg");
- if(!fullName||!email||!name||!address||!type||!phone){box.innerHTML='<div class="msg">Please complete all the fields before continuing.</div>';return}
- box.innerHTML='<div class="msg">Saving your business information...</div>';
- const r=await sb.from("businesses").update({owner_name:fullName,owner_email:email,name,address,business_type:type,phone,setup_complete:true}).eq("id",business.id).eq("owner_id",business.owner_id).select().single();
- if(r.error){box.innerHTML='<div class="msg">'+r.error.message+'</div>';return}
- business=r.data;
- document.getElementById("setup").classList.add("hidden");
- document.getElementById("app").classList.remove("hidden");
- document.getElementById("businessName").textContent=business.name;
- await renderAll();
-}
-async function rows(table){let q=sb.from(table).select("*").eq("business_id",business.id);let r=await q;return r.data||[]}
-function show(id,b){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");document.getElementById("title").textContent=id==="sales"?"Payments":id[0].toUpperCase()+id.slice(1);document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));if(b)b.classList.add("active")}
-async function renderAll(){await renderDashboard();await renderCustomers();await renderOrders();await renderFollowups();await renderTasks();await renderSales();await renderInvoices();await renderTeam()}
-function money(n){return (business?.currency||"₦")+Number(n||0).toLocaleString("en-NG")}
-async function renderDashboard(){let [c,o,p,f,t,i]=await Promise.all(["customers","orders","payments","followups","tasks","invoices"].map(rows));let sales=p.filter(x=>String(x.status).toLowerCase()==="paid").reduce((a,x)=>a+Number(x.amount),0);document.getElementById("dashboard").innerHTML=`<div class="grid"><div class="card"><span class="muted">Customers</span><div class="stat">${c.length}</div></div><div class="card"><span class="muted">Open Follow Ups</span><div class="stat">${f.filter(x=>!x.done).length}</div></div><div class="card"><span class="muted">Pending Orders</span><div class="stat">${o.filter(x=>x.status!=="Delivered").length}</div></div><div class="card"><span class="muted">Paid</span><div class="stat">${money(sales)}</div></div></div><div class="section panel"><div class="sectionhead"><h2>Quick Actions</h2></div><div class="actions"><button class="btn" onclick="openForm('customer')">+ Customer</button><button class="btn" onclick="openForm('order')">+ Order</button><button class="btn" onclick="openForm('payment')">+ Payment</button><button class="btn gold" onclick="openForm('invoice')">+ Invoice</button></div></div>`}
-async function renderCustomers(){let d=await rows("customers");document.getElementById("customers").innerHTML=`<div class="sectionhead"><h2>Customers</h2><button class="btn" onclick="openForm('customer')">+ Add Customer</button></div><div class="tablewrap"><table class="table"><tr><th>Name</th><th>Phone</th><th>Status</th><th>Action</th></tr>${d.map(x=>`<tr><td>${x.name||""}</td><td>${x.phone||""}</td><td>${x.status||""}</td><td><button class="btn" onclick="wa('${x.phone||""}','${x.name||""}')">WhatsApp</button></td></tr>`).join("")}</table></div>`}
-async function renderOrders(){let d=await rows("orders");document.getElementById("orders").innerHTML=`<div class="sectionhead"><h2>Orders</h2><button class="btn" onclick="openForm('order')">+ New Order</button></div>${d.map(x=>`<div class="panel section"><b>#${x.id?.slice?.(0,8)||""} ${x.item||x.notes||""}</b><br><span class="muted">${money(x.amount)} · ${x.status||""}</span></div>`).join("")}`}
-async function renderFollowups(){let d=await rows("followups");document.getElementById("followups").innerHTML=`<div class="sectionhead"><h2>Follow Ups</h2><button class="btn" onclick="openForm('followup')">+ Schedule</button></div>${d.map(x=>`<div class="panel section"><b>${x.note||"Follow up"}</b><br><span class="muted">${x.scheduled_for||x.date||""}</span></div>`).join("")}`}
-async function renderTasks(){let d=await rows("tasks");document.getElementById("tasks").innerHTML=`<div class="sectionhead"><h2>Tasks</h2><button class="btn" onclick="openForm('task')">+ Task</button></div>${d.map(x=>`<div class="panel section"><b>${x.title||x.name||"Task"}</b><br><span class="muted">${x.status||"To Do"}</span></div>`).join("")}`}
-async function renderSales(){let d=await rows("payments");document.getElementById("sales").innerHTML=`<div class="sectionhead"><h2>Payments</h2><button class="btn" onclick="openForm('payment')">+ Record Payment</button></div><div class="tablewrap"><table class="table"><tr><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr>${d.map(x=>`<tr><td>${money(x.amount)}</td><td>${x.method||""}</td><td>${x.status||""}</td><td>${x.created_at?new Date(x.created_at).toLocaleDateString():""}</td></tr>`).join("")}</table></div>`}
-async function renderInvoices(){let d=await rows("invoices");document.getElementById("invoices").innerHTML=`<div class="sectionhead"><h2>Invoices</h2><button class="btn gold" onclick="openForm('invoice')">+ Create Invoice</button></div><div class="tablewrap"><table class="table"><tr><th>Invoice</th><th>Amount</th><th>Due</th><th>Status</th></tr>${d.map(x=>`<tr><td>${x.invoice_number||""}</td><td>${money(x.amount)}</td><td>${x.due_date||""}</td><td><span class="badge ${x.status==="overdue"?"danger":""}">${x.status||""}</span></td></tr>`).join("")}</table></div>`}
-async function renderTeam(){let d=await rows("business_members");document.getElementById("team").innerHTML=`<div class="sectionhead"><h2>Team</h2><button class="btn" onclick="openForm('team')">+ Invite Member</button></div>${d.map(x=>`<div class="panel section">${x.user_id||""} · ${x.role||"Member"}</div>`).join("")}`}
-function wa(p,n){let x=(p||"").replace(/\D/g,"");if(x)window.open("https://wa.me/"+x+"?text="+encodeURIComponent("Hello "+n+", ")," _blank")}
+async function boot(){const {data:{user}}=await sb.auth.getUser();if(!user)return;currentUser=user;document.getElementById("userEmail").textContent=user.email||"";document.getElementById("auth").classList.add("hidden");await loadBusiness();if(!business)return;const complete=Boolean(business.setup_complete&&business.name&&business.business_type&&business.owner_name&&business.phone&&business.address);if(!complete){showBusinessSetup();return}showApp()}
+async function loadBusiness(){const r=await sb.from("businesses").select("*").eq("owner_id",currentUser.id).limit(1).maybeSingle();if(r.error){authMessage(r.error.message,"error");return}if(r.data){business=r.data;return}const ins=await sb.from("businesses").insert({owner_id:currentUser.id,name:"My Business",currency:"₦",owner_email:currentUser.email,setup_complete:false}).select().single();if(ins.error){authMessage(ins.error.message,"error");return}business=ins.data}
+function showBusinessSetup(){document.getElementById("app").classList.add("hidden");document.getElementById("setup").classList.remove("hidden");document.getElementById("sEmail").value=currentUser.email||"";document.getElementById("sFullName").value=business?.owner_name||currentUser.user_metadata?.full_name||"";document.getElementById("sBusinessName").value=business?.name==="My Business"?"":business?.name||"";document.getElementById("sPhone").value=business?.phone||"";document.getElementById("sAddress").value=business?.address||"";document.getElementById("sBusinessType").value=business?.business_type||""}
+async function saveBusinessSetup(){const fullName=document.getElementById("sFullName").value.trim(),email=document.getElementById("sEmail").value.trim(),name=document.getElementById("sBusinessName").value.trim(),phone=document.getElementById("sPhone").value.trim(),address=document.getElementById("sAddress").value.trim(),type=document.getElementById("sBusinessType").value;if(!fullName||!email||!name||!phone||!address||!type){message("setupMsg","Please complete all the fields before continuing.","error");return}message("setupMsg","Saving your business information...");const r=await sb.from("businesses").update({owner_name:fullName,owner_email:email,name,phone,address,business_type:type,setup_complete:true}).eq("id",business.id).eq("owner_id",currentUser.id).select().single();if(r.error){message("setupMsg",r.error.message,"error");return}business=r.data;showApp()}
+function showApp(){document.getElementById("setup").classList.add("hidden");document.getElementById("app").classList.remove("hidden");document.getElementById("businessName").textContent=business.name;renderAll()}
+function showScreen(id,btn){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".navbtn").forEach(b=>b.classList.remove("active"));if(btn)btn.classList.add("active");document.getElementById("title").textContent=id==="sales"?"Sales Insights":id.charAt(0).toUpperCase()+id.slice(1)}
+async function rows(table){const r=await sb.from(table).select("*").eq("business_id",business.id);if(r.error){console.error(r.error);return []}return r.data||[]}
+function money(n){return (business?.currency||"₦")+Number(n||0).toLocaleString("en-NG",{maximumFractionDigits:2})}
+async function renderAll(){await Promise.all([renderDashboard(),renderCustomers(),renderOrders(),renderFollowups(),renderTasks(),renderPayments(),renderInvoices(),renderSales(),renderTeam()])}
+async function renderDashboard(){const [c,o,p,f,t,i]=await Promise.all([rows("customers"),rows("orders"),rows("payments"),rows("followups"),rows("tasks"),rows("invoices")]);const paid=p.filter(x=>String(x.status||"").toLowerCase()==="paid").reduce((a,x)=>a+Number(x.amount||0),0);const overdue=i.filter(x=>x.due_date&&new Date(x.due_date)<new Date()&&!['paid','cancelled'].includes(String(x.status||"").toLowerCase())).length;document.getElementById("dashboard").innerHTML=`<div class="grid"><div class="card"><div class="muted">Customers</div><div class="stat">${c.length}</div></div><div class="card"><div class="muted">Open Follow Ups</div><div class="stat">${f.filter(x=>!x.done).length}</div></div><div class="card"><div class="muted">Pending Orders</div><div class="stat">${o.filter(x=>String(x.status).toLowerCase()!=="delivered").length}</div></div><div class="card"><div class="muted">Paid</div><div class="stat">${money(paid)}</div></div></div><div class="insight-grid"><div class="panel section"><div class="muted">Outstanding invoices</div><div class="insight-value">${money(i.filter(x=>String(x.status).toLowerCase()!=="paid").reduce((a,x)=>a+Number(x.amount||0),0))}</div></div><div class="panel section"><div class="muted">Overdue invoices</div><div class="insight-value">${overdue}</div></div></div><div class="panel section"><div class="sectionhead"><h2>Quick Actions</h2></div><div class="actions"><button class="btn" onclick="openForm('customer')">+ Customer</button><button class="btn" onclick="openForm('order')">+ Order</button><button class="btn" onclick="openForm('payment')">+ Payment</button><button class="btn gold" onclick="openForm('invoice')">+ Invoice</button><button class="btn" onclick="openForm('followup')">+ Follow Up</button><button class="btn" onclick="openForm('task')">+ Task</button></div></div>`}
+async function renderCustomers(){const d=await rows("customers");document.getElementById("customers").innerHTML=`<div class="sectionhead"><h2>Customers</h2><button class="btn" onclick="openForm('customer')">+ Add Customer</button></div>${d.length?`<div class="tablewrap"><table class="table"><tr><th>Name</th><th>Phone</th><th>Status</th><th>Value</th><th>Action</th></tr>${d.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.phone)}</td><td><span class="badge">${esc(x.status||"Potential")}</span></td><td>${money(x.value)}</td><td><button class="btn small" onclick="wa('${encodeURIComponent(x.phone||"")}','${encodeURIComponent(x.name||"")}')">WhatsApp</button></td></tr>`).join("")}</table></div>`:`<div class="panel empty">No customers yet. Add your first customer.</div>`}`}
+async function renderOrders(){const d=await rows("orders");document.getElementById("orders").innerHTML=`<div class="sectionhead"><h2>Orders</h2><button class="btn" onclick="openForm('order')">+ New Order</button></div>${d.length?`<div class="tablewrap"><table class="table"><tr><th>Order</th><th>Amount</th><th>Status</th><th>Payment</th><th>Action</th></tr>${d.map(x=>`<tr><td>#${esc(String(x.id||"").slice(0,8))} ${esc(x.item)}</td><td>${money(x.amount)}</td><td><span class="badge">${esc(x.status||"Processing")}</span></td><td><span class="badge ${String(x.payment_status).toLowerCase()==="paid"?"success":""}">${esc(x.payment_status||"Pending")}</span></td><td><div class="row-actions"><button class="btn small" onclick="updateOrder('${x.id}','Delivered')">Delivered</button><button class="btn small" onclick="updateOrderPayment('${x.id}','Paid')">Paid</button></div></td></tr>`).join("")}</table></div>`:`<div class="panel empty">No orders yet. Create your first order.</div>`}`}
+async function renderFollowups(){const d=await rows("followups");document.getElementById("followups").innerHTML=`<div class="sectionhead"><h2>Follow Ups</h2><button class="btn" onclick="openForm('followup')">+ Schedule Follow Up</button></div>${d.length?`<div class="tablewrap"><table class="table"><tr><th>Note</th><th>Date</th><th>Status</th><th>Action</th></tr>${d.map(x=>`<tr><td>${esc(x.note)}</td><td>${esc(x.followup_date)}</td><td><span class="badge ${x.done?"success":""}">${x.done?"Done":"Open"}</span></td><td>${x.done?"":`<button class="btn small" onclick="completeFollowup('${x.id}')">Mark done</button>`}</td></tr>`).join("")}</table></div>`:`<div class="panel empty">No follow ups yet.</div>`}`}
+async function renderTasks(){const d=await rows("tasks");document.getElementById("tasks").innerHTML=`<div class="sectionhead"><h2>Tasks</h2><button class="btn" onclick="openForm('task')">+ New Task</button></div>${d.length?`<div class="tablewrap"><table class="table"><tr><th>Task</th><th>Due</th><th>Priority</th><th>Status</th><th>Action</th></tr>${d.map(x=>`<tr><td>${esc(x.title)}</td><td>${esc(x.due_date)}</td><td>${esc(x.priority)}</td><td><span class="badge">${esc(x.status||"To Do")}</span></td><td><button class="btn small" onclick="completeTask('${x.id}')">Done</button></td></tr>`).join("")}</table></div>`:`<div class="panel empty">No tasks yet.</div>`}`}
+async function renderPayments(){const d=await rows("payments");document.getElementById("payments").innerHTML=`<div class="sectionhead"><h2>Payments</h2><button class="btn" onclick="openForm('payment')">+ Record Payment</button></div>${d.length?`<div class="tablewrap"><table class="table"><tr><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr>${d.map(x=>`<tr><td>${money(x.amount)}</td><td>${esc(x.method)}</td><td><span class="badge ${String(x.status).toLowerCase()==="paid"?"success":""}">${esc(x.status||"Paid")}</span></td><td>${x.payment_date?esc(x.payment_date):x.created_at?new Date(x.created_at).toLocaleDateString():""}</td></tr>`).join("")}</table></div>`:`<div class="panel empty">No payments yet.</div>`}`}
+async function renderInvoices(){const d=await rows("invoices");document.getElementById("invoices").innerHTML=`<div class="sectionhead"><h2>Invoices</h2><button class="btn gold" onclick="openForm('invoice')">+ Create Invoice</button></div>${d.length?`<div class="tablewrap"><table class="table"><tr><th>Invoice</th><th>Amount</th><th>Due</th><th>Status</th><th>Action</th></tr>${d.map(x=>{const overdue=x.due_date&&new Date(x.due_date)<new Date()&&!['paid','cancelled'].includes(String(x.status||"").toLowerCase());return `<tr><td>${esc(x.invoice_number)}</td><td>${money(x.amount)}</td><td>${esc(x.due_date)}</td><td><span class="badge ${overdue?"danger":String(x.status).toLowerCase()==="paid"?"success":""}">${overdue?"overdue":esc(x.status||"draft")}</span></td><td>${String(x.status).toLowerCase()==="paid"?"":`<button class="btn small" onclick="markInvoicePaid('${x.id}')">Mark paid</button>`}</td></tr>`}).join("")}</table></div>`:`<div class="panel empty">No invoices yet.</div>`}`}
+async function renderSales(){const d=await rows("payments"),paid=d.filter(x=>String(x.status||"").toLowerCase()==="paid").reduce((a,x)=>a+Number(x.amount||0),0),pending=d.filter(x=>String(x.status||"").toLowerCase()!=="paid").reduce((a,x)=>a+Number(x.amount||0),0);document.getElementById("sales").innerHTML=`<div class="grid"><div class="card"><div class="muted">Total collected</div><div class="stat">${money(paid)}</div></div><div class="card"><div class="muted">Pending payments</div><div class="stat">${money(pending)}</div></div></div><div class="panel section"><h2 style="margin-top:0">Sales insights</h2><p class="muted">Use the Payments and Orders sections to track what has been collected and what is still pending.</p></div>`}
+async function renderTeam(){const d=await rows("business_members");document.getElementById("team").innerHTML=`<div class="sectionhead"><h2>Team</h2><button class="btn" onclick="openForm('team')">+ Add Member</button></div><div class="panel section"><p class="muted" style="margin-top:0">Add an existing KabFlow user's Supabase user ID. Email invitations require a backend invite flow and are not performed from this browser only MVP.</p></div>${d.length?`<div class="tablewrap"><table class="table"><tr><th>User ID</th><th>Role</th></tr>${d.map(x=>`<tr><td>${esc(x.user_id)}</td><td>${esc(x.role)}</td></tr>`).join("")}</table></div>`:""}`}
+function wa(phone,name){const p=decodeURIComponent(phone||"").replace(/\D/g,"");const n=decodeURIComponent(name||"");if(!p){alert("This customer does not have a valid phone number.");return}window.open("https://wa.me/"+p+"?text="+encodeURIComponent("Hello "+n+", "),"_blank","noopener")}
 function closeModal(){document.getElementById("modal").classList.remove("show")}
-function field(label,id,type="text",extra=""){return `<label>${label}</label><input id="${id}" class="input" type="${type}" ${extra}>`}
-function openForm(type){
- let c=""; 
- let forms={
- customer:field("Name","f1")+field("WhatsApp","f2")+`<label>Notes</label><textarea id="f3" class="input textarea"></textarea><button class="btn" onclick="saveCustomer()">Save Customer</button>`,
- order:field("Item / Order","f1")+field("Amount","f2","number")+`<label>Notes</label><textarea id="f3" class="input textarea"></textarea><button class="btn" onclick="saveOrder()">Create Order</button>`,
- payment:field("Amount","f1","number")+field("Method","f2")+field("Status","f3")+`<button class="btn gold" onclick="savePayment()">Record Payment</button>`,
- invoice:field("Invoice Number","f1")+field("Amount","f2","number")+field("Due Date","f3","date")+`<label>Notes</label><textarea id="f4" class="input textarea"></textarea><button class="btn gold" onclick="saveInvoice()">Create Invoice</button>`,
- followup:field("Note","f1")+field("Date","f2","date")+`<button class="btn" onclick="saveFollowup()">Schedule</button>`,
- task:field("Task","f1")+field("Priority","f2")+`<button class="btn" onclick="saveTask()">Save Task</button>`,
- team:field("User ID / Email","f1")+field("Role","f2")+`<button class="btn" onclick="saveTeam()">Add Member</button>`
- };
- document.getElementById("mtitle").textContent=type==="customer"?"Add Customer":type==="order"?"New Order":type==="payment"?"Record Payment":type==="invoice"?"Create Invoice":type==="followup"?"Schedule Follow Up":type==="task"?"New Task":"Team Member";
- document.getElementById("mbody").innerHTML=forms[type];document.getElementById("modal").classList.add("show");
-}
-async function insert(table,obj){let r=await sb.from(table).insert({...obj,business_id:business.id});if(r.error)alert(r.error.message);else{closeModal();await renderAll()}}
-async function saveCustomer(){await insert("customers",{name:f1.value,phone:f2.value,notes:f3.value,status:"Potential"})}
-async function saveOrder(){await insert("orders",{item:f1.value,amount:Number(f2.value||0),notes:f3.value,status:"Processing"})}
-async function savePayment(){await insert("payments",{amount:Number(f1.value||0),method:f2.value,status:f3.value||"Paid"})}
-async function saveInvoice(){await insert("invoices",{invoice_number:f1.value,amount:Number(f2.value||0),due_date:f3.value,status:"draft",notes:f4.value})}
-async function saveFollowup(){await insert("followups",{note:f1.value,scheduled_for:f2.value,done:false})}
-async function saveTask(){await insert("tasks",{title:f1.value,priority:f2.value,status:"To Do"})}
-async function saveTeam(){let r=await sb.from("business_members").insert({business_id:business.id,user_id:f1.value,role:f2.value||"Member"});if(r.error)alert(r.error.message);else{closeModal();await renderAll()}}
-async function startVoice(){if(!navigator.mediaDevices)return alert("Voice recording is not supported in this browser.");if(mediaRecorder&&mediaRecorder.state==="recording"){mediaRecorder.stop();return}let stream=await navigator.mediaDevices.getUserMedia({audio:true});audioChunks=[];mediaRecorder=new MediaRecorder(stream);mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);mediaRecorder.onstop=async()=>{stream.getTracks().forEach(t=>t.stop());let blob=new Blob(audioChunks,{type:"audio/webm"});let path=business.id+"/"+Date.now()+".webm";let r=await sb.storage.from("voice-notes").upload(path,blob,{contentType:"audio/webm"});if(r.error)alert(r.error.message);else alert("Voice note uploaded successfully.")};mediaRecorder.start();alert("Recording started. Click the voice button again to stop.")}
-sb.auth.getSession().then(async({data})=>{if(data.session)await boot()});sb.auth.onAuthStateChange(async(e,s)=>{if(e==="PASSWORD_RECOVERY")msg("Set your new password in the recovery flow.")});
+function field(label,id,type="text",placeholder=""){return `<div class="formrow"><label for="${id}">${label}</label><input id="${id}" class="input" type="${type}" placeholder="${placeholder}"></div>`}
+async function customerOptions(){const c=await rows("customers");return `<option value="">No customer selected</option>`+c.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join("")}
+async function openForm(type){let title="",body="";if(type==="customer"){title="Add Customer";body=field("Name","f1","text","Customer name")+field("WhatsApp","f2","tel","Phone number")+`<div class="formrow"><label for="f3">Value</label><input id="f3" class="input" type="number" min="0" placeholder="0"></div><div class="formrow"><label for="f4">Notes</label><textarea id="f4" class="input" rows="3"></textarea></div><button class="btn gold" onclick="saveCustomer()">Save Customer</button>`}
+else if(type==="order"){title="New Order";body=field("Item / Order","f1","text","What was ordered")+`<div class="formrow"><label for="f2">Customer</label><select id="f2" class="input">${await customerOptions()}</select></div>`+field("Amount","f3","number","0")+`<div class="formrow"><label for="f4">Status</label><select id="f4" class="input"><option>Processing</option><option>Confirmed</option><option>Delivered</option><option>Cancelled</option></select></div><button class="btn gold" onclick="saveOrder()">Create Order</button>`}
+else if(type==="payment"){title="Record Payment";body=field("Amount","f1","number","0")+`<div class="formrow"><label for="f2">Customer</label><select id="f2" class="input">${await customerOptions()}</select></div>`+field("Method","f3","text","Cash, transfer, card")+`<div class="formrow"><label for="f4">Status</label><select id="f4" class="input"><option>Paid</option><option>Pending</option><option>Failed</option></select></div><button class="btn gold" onclick="savePayment()">Record Payment</button>`}
+else if(type==="invoice"){title="Create Invoice";body=field("Invoice Number","f1","text","INV-001")+`<div class="formrow"><label for="f2">Customer</label><select id="f2" class="input">${await customerOptions()}</select></div>`+field("Amount","f3","number","0")+field("Due Date","f4","date")+`<div class="formrow"><label for="f5">Notes</label><textarea id="f5" class="input" rows="3"></textarea></div><button class="btn gold" onclick="saveInvoice()">Create Invoice</button>`}
+else if(type==="followup"){title="Schedule Follow Up";body=field("Note","f1","text","What should you follow up about")+`<div class="formrow"><label for="f2">Customer</label><select id="f2" class="input">${await customerOptions()}</select></div>`+field("Date","f3","date")+`<button class="btn gold" onclick="saveFollowup()">Schedule Follow Up</button>`}
+else if(type==="task"){title="New Task";body=field("Task","f1","text","Task title")+field("Due Date","f2","date")+`<div class="formrow"><label for="f3">Priority</label><select id="f3" class="input"><option>Low</option><option selected>Medium</option><option>High</option></select></div><button class="btn gold" onclick="saveTask()">Save Task</button>`}
+else if(type==="team"){title="Add Team Member";body=field("Supabase User ID","f1","text","UUID of the user")+`<div class="formrow"><label for="f2">Role</label><select id="f2" class="input"><option>Staff</option><option>Manager</option><option>Owner</option></select></div><button class="btn gold" onclick="saveTeam()">Add Member</button>`}
+document.getElementById("modalTitle").textContent=title;document.getElementById("modalBody").innerHTML=`<div class="modalform">${body}</div>`;document.getElementById("modal").classList.add("show")}
+async function insert(table,obj){const r=await sb.from(table).insert({...obj,business_id:business.id});if(r.error){alert(r.error.message);return false}closeModal();await renderAll();return true}
+async function saveCustomer(){const ok=await insert("customers",{name:f1.value.trim(),phone:f2.value.trim(),value:Number(f3.value||0),notes:f4.value.trim(),status:"Potential"});if(!ok)return}
+async function saveOrder(){await insert("orders",{item:f1.value.trim(),customer_id:f2.value||null,amount:Number(f3.value||0),status:f4.value,payment_status:"Pending"})}
+async function savePayment(){await insert("payments",{amount:Number(f1.value||0),customer_id:f2.value||null,method:f3.value.trim(),status:f4.value,payment_date:new Date().toISOString().slice(0,10)})}
+async function saveInvoice(){await insert("invoices",{invoice_number:f1.value.trim(),customer_id:f2.value||null,amount:Number(f3.value||0),due_date:f4.value||null,status:"draft",notes:f5.value.trim()})}
+async function saveFollowup(){await insert("followups",{customer_id:f2.value||null,note:f1.value.trim(),followup_date:f3.value||null,done:false})}
+async function saveTask(){await insert("tasks",{title:f1.value.trim(),due_date:f2.value||null,priority:f3.value,status:"To Do"})}
+async function saveTeam(){const r=await sb.from("business_members").insert({business_id:business.id,user_id:f1.value.trim(),role:f2.value});if(r.error){alert(r.error.message);return}closeModal();await renderAll()}
+async function updateOrder(id,status){const r=await sb.from("orders").update({status}).eq("id",id).eq("business_id",business.id);if(r.error)alert(r.error.message);else await renderAll()}
+async function updateOrderPayment(id,status){const r=await sb.from("orders").update({payment_status:status}).eq("id",id).eq("business_id",business.id);if(r.error)alert(r.error.message);else await renderAll()}
+async function completeFollowup(id){const r=await sb.from("followups").update({done:true}).eq("id",id).eq("business_id",business.id);if(r.error)alert(r.error.message);else await renderAll()}
+async function completeTask(id){const r=await sb.from("tasks").update({status:"Done"}).eq("id",id).eq("business_id",business.id);if(r.error)alert(r.error.message);else await renderAll()}
+async function markInvoicePaid(id){const r=await sb.from("invoices").update({status:"paid",paid_at:new Date().toISOString()}).eq("id",id).eq("business_id",business.id);if(r.error)alert(r.error.message);else await renderAll()}
+async function startVoice(){if(!navigator.mediaDevices?.getUserMedia){alert("Voice recording is not supported in this browser.");return}if(mediaRecorder?.state==="recording"){mediaRecorder.stop();document.getElementById("voiceBtn").textContent="Voice note";return}try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});audioChunks=[];mediaRecorder=new MediaRecorder(stream);mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);mediaRecorder.onstop=async()=>{stream.getTracks().forEach(t=>t.stop());const blob=new Blob(audioChunks,{type:"audio/webm"});const path=business.id+"/"+Date.now()+".webm";const r=await sb.storage.from("voice-notes").upload(path,blob,{contentType:"audio/webm"});if(r.error)alert("Voice note could not be uploaded: "+r.error.message);else alert("Voice note uploaded successfully.")};mediaRecorder.start();document.getElementById("voiceBtn").textContent="Stop recording"}catch(e){alert("Microphone access was not available.")}}
+
+sb.auth.getSession().then(async({data})=>{if(data.session)await boot()});
+sb.auth.onAuthStateChange(async(event,session)=>{if(event==="PASSWORD_RECOVERY"){authMessage("Password recovery is ready. Enter your new password in the recovery flow.","success")}if(event==="SIGNED_OUT"){location.reload()}});
 </script>
-</body></html>
+</body>
+</html>

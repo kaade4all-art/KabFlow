@@ -9,164 +9,1723 @@
 :root{--navy:#082d62;--navy2:#061f45;--blue:#0b63ce;--gold:#c79a2b;--gold2:#e0b84c;--ink:#102a4c;--muted:#65758b;--line:#dfe6ef;--bg:#f5f8fc;--white:#fff;--danger:#b42318;--success:#087443}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg)}button,input,select,textarea{font:inherit}button{cursor:pointer}
 .hidden{display:none!important}
-/* Authentication */
 .auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:34px 18px;background:radial-gradient(circle at 18% 20%,#1166c5 0,#0a438e 32%,#06234c 72%,#031a39 100%);position:relative;overflow:hidden}
 .auth:before,.auth:after{content:"";position:absolute;border:1px solid rgba(255,255,255,.09);border-radius:50%;pointer-events:none}.auth:before{width:760px;height:760px;left:-480px;bottom:-420px}.auth:after{width:900px;height:900px;right:-560px;top:-560px}
 .auth-card{width:min(560px,100%);background:rgba(255,255,255,.98);border-radius:22px;box-shadow:0 28px 70px rgba(0,0,0,.28);padding:34px 36px 28px;position:relative;z-index:1}
 .brand-lockup{text-align:center;margin-bottom:24px}.brand-mark{display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:16px;background:linear-gradient(145deg,#e2b94d,#ad7e13);box-shadow:0 8px 20px rgba(180,135,30,.22);margin-bottom:10px}.brand-mark svg{width:40px;height:40px}.brand-name{font-size:42px;font-weight:800;letter-spacing:-2px;color:var(--navy);line-height:1}.brand-name span{color:var(--gold)}.tagline{margin-top:9px;color:#5c6f88;font-size:15px}
 .auth-panel{border:1px solid #e1e8f0;border-radius:15px;padding:25px 25px 21px;background:#fff}.auth-panel h1{margin:0;font-size:28px;letter-spacing:-.6px}.intro{margin:8px 0 22px;color:var(--muted);line-height:1.45}.formrow{margin-bottom:15px}.formrow label,.setupbox label{display:block;font-weight:650;font-size:13px;margin:0 0 7px}.fieldwrap{position:relative}.input{width:100%;border:1px solid #cfd9e5;border-radius:9px;background:#fff;padding:12px 13px;outline:none;color:var(--ink);transition:.15s}.input:focus{border-color:#5c93d6;box-shadow:0 0 0 3px rgba(11,99,206,.10)}.iconfield .input{padding-left:43px}.fieldicon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#60738a;font-size:18px;z-index:2}.passwrap .input{padding-right:65px}.showpass{position:absolute;right:7px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--navy);font-weight:700;padding:7px}.forgot{text-align:right;margin-top:-4px;margin-bottom:13px}.linkbtn,.forgot button{border:0;background:none;color:#0757bb;text-decoration:underline;padding:0;font-weight:650}.authbtn{width:100%;border:0;border-radius:9px;background:linear-gradient(180deg,#d6a92f,#bd8d1f);color:#082d62;font-weight:800;padding:13px 16px;box-shadow:0 7px 14px rgba(174,127,22,.16)}.authbtn:disabled{opacity:.65;cursor:wait}.legal{font-size:11.5px;color:#68798d;text-align:center;margin-top:12px;line-height:1.5}.legal a{color:#0757bb}.authswitch{text-align:center;margin:20px 0 14px;color:#61738a}.authswitch button{border:0;background:none;color:#0757bb;text-decoration:underline;font-weight:700}.authfooter{text-align:center;color:#718198;font-size:12px;line-height:1.7}.authfooter .line{margin-bottom:4px;font-size:13px}.message{margin-top:13px;padding:10px 12px;border-radius:8px;background:#eef5ff;color:#23476f;font-size:13px}.message.error{background:#fff0ef;color:var(--danger)}.message.success{background:#edf9f3;color:var(--success)}
-/* Setup */
+
 .setup{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px 18px;background:linear-gradient(135deg,#eaf3ff,#f8fbff)}.setupbox{width:min(720px,100%);background:#fff;border-radius:20px;box-shadow:0 20px 55px rgba(21,52,92,.14);padding:30px}.setupback{margin-bottom:10px}.backbtn{border:0;background:transparent;color:#0757bb;font-weight:700;padding:6px 0;font-size:14px}.backbtn:hover{text-decoration:underline}.setuphead{display:flex;gap:14px;align-items:center;margin-bottom:22px}.setuphead .mini-mark{width:50px;height:50px;border-radius:13px;background:var(--navy);display:grid;place-items:center}.setuphead svg{width:34px}.setuphead h1{margin:0;font-size:26px}.setupgrid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.setupgrid .full{grid-column:1/-1}.setup-actions{margin-top:20px}.btn{border:1px solid #cbd7e5;border-radius:9px;padding:10px 14px;background:#fff;color:var(--navy);font-weight:700}.btn:hover{background:#f5f8fc}.btn.gold{border-color:#c69a31;background:var(--gold);color:#092d60}.btn.danger{color:var(--danger);border-color:#efc3bf}.btn.small{padding:7px 10px;font-size:12px}
-/* App */
+
 .app{min-height:100vh}.appbar{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 24px}.appbrand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:23px}.appbrand .mark{width:36px;height:36px;border-radius:10px;background:var(--navy);display:grid;place-items:center}.appbrand svg{width:26px}.appbrand span{color:var(--gold)}.business-pill{font-size:13px;color:#53677f}.app-actions{display:flex;gap:8px;align-items:center}.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 68px)}.sidebar{background:#072b5d;color:#dbe9fa;padding:20px 12px}.navbtn{width:100%;text-align:left;border:0;background:transparent;color:#dbe9fa;border-radius:9px;padding:11px 13px;margin-bottom:4px;font-weight:600}.navbtn:hover,.navbtn.active{background:rgba(255,255,255,.11);color:#fff}.navsection{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:#90add0;margin:14px 12px 7px}.main{padding:26px;min-width:0}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.top h1{margin:0;font-size:27px;letter-spacing:-.5px}.screen{display:none}.screen.active{display:block}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:0 5px 15px rgba(23,55,91,.045)}.card{padding:18px}.stat{font-size:27px;font-weight:800;margin-top:8px}.muted{color:var(--muted)}.section{padding:18px;margin-top:16px}.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.sectionhead h2{margin:0;font-size:19px}.actions{display:flex;gap:8px;flex-wrap:wrap}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:11px;background:#fff}.table{width:100%;border-collapse:collapse;min-width:600px}.table th,.table td{padding:12px 13px;border-bottom:1px solid #edf1f5;text-align:left;font-size:13px}.table th{background:#f8fafc;color:#51657e;font-size:11px;text-transform:uppercase;letter-spacing:.6px}.table tr:last-child td{border-bottom:0}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef4fb;color:#315274;font-size:11px;font-weight:700}.badge.danger{background:#fff0ef;color:var(--danger)}.badge.success{background:#edf9f3;color:var(--success)}.empty{padding:28px;text-align:center;color:#72839a}.row-actions{display:flex;gap:6px;flex-wrap:wrap}.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.insight-value{font-size:24px;font-weight:800;margin-top:6px}
-/* Modal */
+
 .modal{position:fixed;inset:0;background:rgba(2,18,39,.48);display:none;align-items:center;justify-content:center;padding:18px;z-index:50}.modal.show{display:flex}.modalbox{background:#fff;border-radius:16px;width:min(560px,100%);max-height:90vh;overflow:auto;padding:24px}.modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}.modalhead h2{margin:0;font-size:20px}.close{border:0;background:transparent;font-size:25px;color:#63758a}.modalform .formrow{margin-bottom:13px}.modalform .btn{margin-top:5px}
+
 @media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{display:flex;gap:5px;overflow:auto;padding:8px;position:sticky;top:68px;z-index:10}.navsection{display:none}.navbtn{width:auto;white-space:nowrap;margin:0;padding:9px 11px}.grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.auth{padding:18px 12px}.auth-card{padding:25px 15px 22px;border-radius:18px}.auth-panel{padding:20px 16px}.brand-name{font-size:36px}.auth-panel h1{font-size:24px}.setup{padding:15px}.setupbox{padding:22px 17px}.setupgrid{grid-template-columns:1fr}.setupgrid .full{grid-column:auto}.appbar{padding:0 14px}.business-pill{display:none}.main{padding:18px 12px}.top h1{font-size:23px}.grid{grid-template-columns:1fr 1fr}.insight-grid{grid-template-columns:1fr}.app-actions .btn:first-child{display:none}}
 </style>
 </head>
+
 <body>
 
 <div id="auth" class="auth">
   <div class="auth-card">
+
     <div class="brand-lockup">
-      <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><path d="M18 10v44M18 32l27-22M18 32l27 22" stroke="#082d62" stroke-width="8" stroke-linecap="round"/><path d="M11 39c8 7 18 9 28 5 9-4 15-11 16-21" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M48 18l8 5-8 5" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M18 10v44M18 32l27-22M18 32l27 22" stroke="#082d62" stroke-width="8" stroke-linecap="round"/>
+          <path d="M11 39c8 7 18 9 28 5 9-4 15-11 16-21" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+          <path d="M48 18l8 5-8 5" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
       <div class="brand-name">Kab<span>Flow</span></div>
       <div class="tagline">Organize your WhatsApp business in one place.</div>
     </div>
+
     <div class="auth-panel">
+
       <h1 id="authTitle">Create your account</h1>
-      <p id="authIntro" class="intro">Get started and manage your customers, orders, payments and follow ups easily.</p>
-      <div id="nameRow" class="formrow"><label for="fullName">Full name</label><div class="fieldwrap iconfield"><span class="fieldicon">♙</span><input id="fullName" class="input" type="text" autocomplete="name" placeholder="Enter your full name"></div></div>
-      <div class="formrow"><label for="email">Email address</label><div class="fieldwrap iconfield"><span class="fieldicon">✉</span><input id="email" class="input" type="email" autocomplete="email" placeholder="Enter your email address"></div></div>
-      <div class="formrow"><label for="password">Password</label><div class="fieldwrap passwrap"><span class="fieldicon">▢</span><input id="password" class="input" type="password" autocomplete="new-password" placeholder="Create a password"><button class="showpass" id="showPassBtn" type="button" onclick="togglePassword()">Show</button></div></div>
-      <div id="confirmWrap" class="formrow"><label for="confirmPassword">Confirm password</label><div class="fieldwrap"><input id="confirmPassword" class="input" type="password" autocomplete="new-password" placeholder="Confirm your password"></div></div>
-      <div id="forgotRow" class="forgot hidden"><button type="button" onclick="forgotPassword()">Forgot password?</button></div>
-      <button id="authBtn" class="authbtn" type="button" onclick="submitAuth()">Create account</button>
-      <div id="legalText" class="legal">By creating an account, you agree to our <a href="#" onclick="return false">Terms of Service</a> and <a href="#" onclick="return false">Privacy Policy</a>.</div>
-      <div id="authMsg"></div>
+
+      <p id="authIntro" class="intro">
+        Get started and manage your customers, orders, payments and follow ups easily.
+      </p>
+
+      <div id="nameRow" class="formrow">
+        <label for="fullName">Full name</label>
+        <input id="fullName" class="input" type="text" placeholder="Your full name">
+      </div>
+
+      <div class="formrow">
+        <label for="email">Email address</label>
+        <input id="email" class="input" type="email" placeholder="you@example.com">
+      </div>
+
+      <div class="formrow">
+        <label for="password">Password</label>
+
+        <div class="fieldwrap passwrap">
+          <input id="password" class="input" type="password" placeholder="Create a password">
+          <button type="button" class="showpass" onclick="togglePassword()">Show</button>
+        </div>
+      </div>
+
+      <div id="confirmRow" class="formrow">
+        <label for="confirmPassword">Confirm password</label>
+        <input id="confirmPassword" class="input" type="password" placeholder="Confirm your password">
+      </div>
+
+      <div id="forgotRow" class="forgot hidden">
+        <button type="button" onclick="forgotPassword()">Forgot password?</button>
+      </div>
+
+      <button id="authBtn" class="authbtn" onclick="handleAuth()">Create account</button>
+
+      <div id="authMsg" class="message hidden"></div>
+
+      <div class="legal">
+        By continuing, you agree to use KabFlow responsibly.
+      </div>
+
+      <div class="authswitch">
+        <span id="switchText">Already have an account?</span>
+        <button id="switchBtn" type="button" onclick="toggleAuthMode()">Sign in</button>
+      </div>
+
     </div>
-    <div class="authswitch"><span id="switchText">Already have an account?</span> <button id="switchBtn" type="button" onclick="toggleAuthMode()">Sign in</button></div>
-    <div class="authfooter"><div class="line">Manage customers. Track orders. Grow your business.</div>© <span id="currentYear"></span> KabFlow. All rights reserved.</div>
+
+    <div class="authfooter">
+      <div class="line">Service beyond imagination.</div>
+      <div>© <span id="currentYear"></span> KabFlow. All rights reserved.</div>
+    </div>
+
   </div>
 </div>
 
 <div id="setup" class="setup hidden">
   <div class="setupbox">
-    <div class="setupback"><button class="backbtn" type="button" onclick="backToSignIn()" aria-label="Back to sign in">← Back</button></div>
-    <div class="setuphead"><div class="mini-mark"><svg viewBox="0 0 64 64" fill="none"><path d="M18 10v44M18 32l27-22M18 32l27 22" stroke="#e0b84c" stroke-width="8" stroke-linecap="round"/><path d="M11 39c8 7 18 9 28 5 9-4 15-11 16-21" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></div><div><h1>Set up your business</h1><div class="muted">Complete your profile before entering KabFlow.</div></div></div>
-    <div class="setupgrid">
-      <div><label for="sFullName">Full name</label><input id="sFullName" class="input" type="text"></div>
-      <div><label for="sEmail">Email address</label><input id="sEmail" class="input" type="email" readonly></div>
-      <div><label for="sBusinessName">Business name</label><input id="sBusinessName" class="input" type="text"></div>
-      <div><label for="sPhone">Phone number</label><input id="sPhone" class="input" type="tel"></div>
-      <div class="full"><label for="sAddress">Business address</label><input id="sAddress" class="input" type="text"></div>
-      <div class="full"><label for="sBusinessType">Business type</label><select id="sBusinessType" class="input"><option value="">Select business type</option><option>Fashion</option><option>Food and catering</option><option>Beauty and cosmetics</option><option>Electronics</option><option>Retail</option><option>Wholesale</option><option>Services</option><option>Real estate</option><option>Education</option><option>Other</option></select></div>
+
+    <div class="setupback">
+      <button class="backbtn" type="button" onclick="backToSignIn()">
+        ← Back
+      </button>
     </div>
-    <div id="setupMsg"></div><div class="setup-actions"><button class="btn gold" style="width:100%" onclick="saveBusinessSetup()">Save and Continue</button></div>
+
+    <div class="setuphead">
+      <div class="mini-mark">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M18 10v44M18 32l27-22M18 32l27 22" stroke="#e0b84c" stroke-width="8" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div>
+        <h1>Set up your business</h1>
+        <div class="muted">Tell us about your business before entering KabFlow.</div>
+      </div>
+    </div>
+
+    <div class="setupgrid">
+
+      <div>
+        <label for="businessName">Business name</label>
+        <input id="businessName" class="input" type="text" placeholder="Business name">
+      </div>
+
+      <div>
+        <label for="businessPhone">Phone number</label>
+        <input id="businessPhone" class="input" type="tel" placeholder="Phone number">
+      </div>
+
+      <div>
+        <label for="businessType">Business type</label>
+        <select id="businessType" class="input">
+          <option value="">Select business type</option>
+          <option>Fashion</option>
+          <option>Food and catering</option>
+          <option>Beauty and cosmetics</option>
+          <option>Electronics</option>
+          <option>Retail</option>
+          <option>Wholesale</option>
+          <option>Services</option>
+          <option>Real estate</option>
+          <option>Education</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="businessEmail">Business email</label>
+        <input id="businessEmail" class="input" type="email" placeholder="Business email">
+      </div>
+
+      <div class="full">
+        <label for="businessAddress">Business address</label>
+        <textarea id="businessAddress" class="input" rows="3" placeholder="Business address"></textarea>
+      </div>
+
+    </div>
+
+    <div class="setup-actions">
+      <button class="btn gold" type="button" onclick="saveBusinessSetup()">
+        Save and continue
+      </button>
+    </div>
+
+    <div id="setupMsg" class="message hidden"></div>
+
   </div>
 </div>
 
 <div id="app" class="app hidden">
+
   <header class="appbar">
-    <div class="appbrand"><div class="mark"><svg viewBox="0 0 64 64" fill="none"><path d="M18 10v44M18 32l27-22M18 32l27 22" stroke="#e0b84c" stroke-width="8" stroke-linecap="round"/><path d="M11 39c8 7 18 9 28 5 9-4 15-11 16-21" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></div><div>Kab<span>Flow</span></div></div>
-    <div id="businessName" class="business-pill">KabFlow</div>
-    <div class="app-actions"><button class="btn small" onclick="startVoice()" id="voiceBtn">Voice note</button><button class="btn small" onclick="signOut()">Sign out</button></div>
+
+    <div class="appbrand">
+      <div class="mark">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M18 10v44M18 32l27-22M18 32l27 22" stroke="#e0b84c" stroke-width="8" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      Kab<span>Flow</span>
+    </div>
+
+    <div id="businessPill" class="business-pill"></div>
+
+    <div class="app-actions">
+      <button class="btn" onclick="showScreen('dashboard')">Dashboard</button>
+      <button class="btn danger" onclick="signOut()">Sign out</button>
+    </div>
+
   </header>
+
   <div class="layout">
+
     <aside class="sidebar">
-      <div class="navsection">Workspace</div>
-      <button class="navbtn active" onclick="showScreen('dashboard',this)">Dashboard</button>
-      <button class="navbtn" onclick="showScreen('customers',this)">Customers</button>
-      <button class="navbtn" onclick="showScreen('orders',this)">Orders</button>
-      <button class="navbtn" onclick="showScreen('followups',this)">Follow Ups</button>
-      <button class="navbtn" onclick="showScreen('tasks',this)">Tasks</button>
-      <button class="navbtn" onclick="showScreen('payments',this)">Payments</button>
-      <button class="navbtn" onclick="showScreen('invoices',this)">Invoices</button>
-      <button class="navbtn" onclick="showScreen('sales',this)">Sales Insights</button>
-      <button class="navbtn" onclick="showScreen('team',this)">Team</button>
+
+      <div class="navsection">Main</div>
+
+      <button class="navbtn active" data-screen="dashboard" onclick="showScreen('dashboard')">Dashboard</button>
+      <button class="navbtn" data-screen="customers" onclick="showScreen('customers')">Customers</button>
+      <button class="navbtn" data-screen="orders" onclick="showScreen('orders')">Orders</button>
+      <button class="navbtn" data-screen="payments" onclick="showScreen('payments')">Payments</button>
+      <button class="navbtn" data-screen="invoices" onclick="showScreen('invoices')">Invoices</button>
+      <button class="navbtn" data-screen="followups" onclick="showScreen('followups')">Follow Ups</button>
+      <button class="navbtn" data-screen="tasks" onclick="showScreen('tasks')">Tasks</button>
+
+      <div class="navsection">Business</div>
+
+      <button class="navbtn" data-screen="sales" onclick="showScreen('sales')">Sales Insights</button>
+      <button class="navbtn" data-screen="team" onclick="showScreen('team')">Team</button>
+
     </aside>
+
     <main class="main">
-      <div class="top"><h1 id="title">Dashboard</h1><span class="muted" id="userEmail"></span></div>
+
+      <div class="top">
+        <h1 id="screenTitle">Dashboard</h1>
+        <div id="voiceArea">
+          <button id="voiceBtn" class="btn" onclick="startVoice()">Voice note</button>
+        </div>
+      </div>
+
       <section id="dashboard" class="screen active"></section>
       <section id="customers" class="screen"></section>
       <section id="orders" class="screen"></section>
-      <section id="followups" class="screen"></section>
-      <section id="tasks" class="screen"></section>
       <section id="payments" class="screen"></section>
       <section id="invoices" class="screen"></section>
+      <section id="followups" class="screen"></section>
+      <section id="tasks" class="screen"></section>
       <section id="sales" class="screen"></section>
       <section id="team" class="screen"></section>
+
     </main>
+
   </div>
 </div>
 
-<div id="modal" class="modal"><div class="modalbox"><div class="modalhead"><h2 id="modalTitle"></h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
+<div id="modal" class="modal">
+  <div class="modalbox">
+
+    <div class="modalhead">
+      <h2 id="modalTitle"></h2>
+      <button class="close" onclick="closeModal()">×</button>
+    </div>
+
+    <div id="modalBody"></div>
+
+  </div>
+</div>
 
 <script>
 const SUPABASE_URL="https://jlzcvtpvgvhmzgfnrovr.supabase.co";
 const SUPABASE_KEY="sb_publishable_tZK_j7orO13jGpYzCt7BIQ_hRhQUEz8";
+
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let authMode="signup",business=null,currentUser=null,mediaRecorder=null,audioChunks=[];
+
+let currentUser=null;
+let business=null;
+let authMode="signup";
+let mediaRecorder=null;
+let audioChunks=[];
 
 document.getElementById("currentYear").textContent=new Date().getFullYear();
-function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
-function message(id,text,type=""){document.getElementById(id).innerHTML=text?`<div class="message ${type}">${esc(text)}</div>`:""}
-function authMessage(text,type=""){message("authMsg",text,type)}
-function toggleAuthMode(){setAuthMode(authMode==="signup"?"login":"signup")}
-function setAuthMode(mode){authMode=mode;document.getElementById("authTitle").textContent=mode==="login"?"Sign in to KabFlow":"Create your account";document.getElementById("authIntro").textContent=mode==="login"?"Welcome back. Sign in to manage your business in one place.":"Get started and manage your customers, orders, payments and follow ups easily.";document.getElementById("nameRow").classList.toggle("hidden",mode!=="signup");document.getElementById("confirmWrap").classList.toggle("hidden",mode!=="signup");document.getElementById("forgotRow").classList.toggle("hidden",mode!=="login");document.getElementById("legalText").classList.toggle("hidden",mode!=="signup");document.getElementById("authBtn").textContent=mode==="login"?"Sign in":"Create account";document.getElementById("switchText").textContent=mode==="login"?"New to KabFlow?":"Already have an account?";document.getElementById("switchBtn").textContent=mode==="login"?"Create account":"Sign in";document.getElementById("password").setAttribute("autocomplete",mode==="login"?"current-password":"new-password");authMessage("")}
-function togglePassword(){const p=document.getElementById("password"),b=document.getElementById("showPassBtn");p.type=p.type==="password"?"text":"password";b.textContent=p.type==="password"?"Show":"Hide"}
-async function submitAuth(){const btn=document.getElementById("authBtn");const email=document.getElementById("email").value.trim();const password=document.getElementById("password").value;if(!email||!password){authMessage("Enter your email and password.","error");return}btn.disabled=true;try{if(authMode==="signup"){const name=document.getElementById("fullName").value.trim(),confirm=document.getElementById("confirmPassword").value;if(!name){authMessage("Enter your full name.","error");return}if(password.length<6){authMessage("Password must be at least 6 characters.","error");return}if(password!==confirm){authMessage("Passwords do not match.","error");return}const r=await sb.auth.signUp({email,password,options:{data:{full_name:name}}});if(r.error){authMessage(r.error.message,"error");return}if(r.data.session){await boot()}else{authMessage("Account created. Check your email if confirmation is required, then use the Sign in link below.","success")}}else{const r=await sb.auth.signInWithPassword({email,password});if(r.error){authMessage(r.error.message,"error");return}await boot()}}finally{btn.disabled=false}}
-async function forgotPassword(){const email=document.getElementById("email").value.trim();if(!email){authMessage("Enter your email address first.","error");return}const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});if(r.error){authMessage(r.error.message,"error");return}authMessage("Password recovery email sent.","success")}
-async function signOut(){await sb.auth.signOut();location.reload()}
-async function boot(){const {data:{user}}=await sb.auth.getUser();if(!user)return;currentUser=user;document.getElementById("userEmail").textContent=user.email||"";document.getElementById("auth").classList.add("hidden");await loadBusiness();if(!business)return;const complete=Boolean(business.setup_complete&&business.name&&business.business_type&&business.owner_name&&business.phone&&business.address);if(!complete){showBusinessSetup();return}showApp()}
-async function loadBusiness(){const r=await sb.from("businesses").select("*").eq("owner_id",currentUser.id).limit(1).maybeSingle();if(r.error){authMessage(r.error.message,"error");return}if(r.data){business=r.data;return}const ins=await sb.from("businesses").insert({owner_id:currentUser.id,name:"My Business",currency:"₦",owner_email:currentUser.email,setup_complete:false}).select().single();if(ins.error){authMessage(ins.error.message,"error");return}business=ins.data}
-function showBusinessSetup(){document.getElementById("app").classList.add("hidden");document.getElementById("setup").classList.remove("hidden");document.getElementById("sEmail").value=currentUser.email||"";document.getElementById("sFullName").value=business?.owner_name||currentUser.user_metadata?.full_name||"";document.getElementById("sBusinessName").value=business?.name==="My Business"?"":business?.name||"";document.getElementById("sPhone").value=business?.phone||"";document.getElementById("sAddress").value=business?.address||"";document.getElementById("sBusinessType").value=business?.business_type||""}
-async function saveBusinessSetup(){const fullName=document.getElementById("sFullName").value.trim(),email=document.getElementById("sEmail").value.trim(),name=document.getElementById("sBusinessName").value.trim(),phone=document.getElementById("sPhone").value.trim(),address=document.getElementById("sAddress").value.trim(),type=document.getElementById("sBusinessType").value;if(!fullName||!email||!name||!phone||!address||!type){message("setupMsg","Please complete all the fields before continuing.","error");return}message("setupMsg","Saving your business information...");const r=await sb.from("businesses").update({owner_name:fullName,owner_email:email,name,phone,address,business_type:type,setup_complete:true}).eq("id",business.id).eq("owner_id",currentUser.id);if(r.error){message("setupMsg",r.error.message,"error");return}const refreshed=await sb.from("businesses").select("*").eq("id",business.id).eq("owner_id",currentUser.id).maybeSingle();if(refreshed.error){message("setupMsg",refreshed.error.message,"error");return}if(!refreshed.data){message("setupMsg","Your business was not returned after saving. Please check your Supabase business policies.","error");return}business=refreshed.data;showApp()}
-function backToSignIn(){document.getElementById("setup").classList.add("hidden");document.getElementById("app").classList.add("hidden");document.getElementById("auth").classList.remove("hidden");setAuthMode("login");document.getElementById("authMsg").innerHTML=""}
-function showApp(){document.getElementById("setup").classList.add("hidden");document.getElementById("app").classList.remove("hidden");document.getElementById("businessName").textContent=business.name;renderAll()}
-function showScreen(id,btn){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".navbtn").forEach(b=>b.classList.remove("active"));if(btn)btn.classList.add("active");document.getElementById("title").textContent=id==="sales"?"Sales Insights":id.charAt(0).toUpperCase()+id.slice(1)}
-async function rows(table){const r=await sb.from(table).select("*").eq("business_id",business.id);if(r.error){console.error(r.error);return []}return r.data||[]}
-function money(n){return (business?.currency||"₦")+Number(n||0).toLocaleString("en-NG",{maximumFractionDigits:2})}
-async function renderAll(){await Promise.all([renderDashboard(),renderCustomers(),renderOrders(),renderFollowups(),renderTasks(),renderPayments(),renderInvoices(),renderSales(),renderTeam()])}
-async function renderDashboard(){const [c,o,p,f,t,i]=await Promise.all([rows("customers"),rows("orders"),rows("payments"),rows("followups"),rows("tasks"),rows("invoices")]);const paid=p.filter(x=>String(x.status||"").toLowerCase()==="paid").reduce((a,x)=>a+Number(x.amount||0),0);const overdue=i.filter(x=>x.due_date&&new Date(x.due_date)<new Date()&&!['paid','cancelled'].includes(String(x.status||"").toLowerCase())).length;document.getElementById("dashboard").innerHTML=`<div class="grid"><div class="card"><div class="muted">Customers</div><div class="stat">${c.length}</div></div><div class="card"><div class="muted">Open Follow Ups</div><div class="stat">${f.filter(x=>!x.done).length}</div></div><div class="card"><div class="muted">Pending Orders</div><div class="stat">${o.filter(x=>String(x.status).toLowerCase()!=="delivered").length}</div></div><div class="card"><div class="muted">Paid</div><div class="stat">${money(paid)}</div></div></div><div class="insight-grid"><div class="panel section"><div class="muted">Outstanding invoices</div><div class="insight-value">${money(i.filter(x=>String(x.status).toLowerCase()!=="paid").reduce((a,x)=>a+Number(x.amount||0),0))}</div></div><div class="panel section"><div class="muted">Overdue invoices</div><div class="insight-value">${overdue}</div></div></div><div class="panel section"><div class="sectionhead"><h2>Quick Actions</h2></div><div class="actions"><button class="btn" onclick="openForm('customer')">+ Customer</button><button class="btn" onclick="openForm('order')">+ Order</button><button class="btn" onclick="openForm('payment')">+ Payment</button><button class="btn gold" onclick="openForm('invoice')">+ Invoice</button><button class="btn" onclick="openForm('followup')">+ Follow Up</button><button class="btn" onclick="openForm('task')">+ Task</button></div></div>`}
-async function renderCustomers(){const d=await rows("customers");document.getElementById("customers").innerHTML=`<div class="sectionhead"><h2>Customers</h2><button class="btn" onclick="openForm('customer')">+ Add Customer</button></div>${d.length?`<div class="tablewrap"><table class="table"><tr><th>Name</th><th>Phone</th><th>Status</th><th>Value</th><th>Action</th></tr>${d.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.phone)}</td><td><span class="badge">${esc(x.status||"Potential")}</span></td><td>${money(x.value)}</td><td><button class="btn small" onclick="wa('${encodeURIComponent(x.phone||"")}','${encodeURIComponent(x.name||"")}')">WhatsApp</button></td></tr>`).join("")}</table></div>`:`<div class="panel empty">No customers yet. Add your first customer.</div>`}`}
-async function renderOrders(){const d=await rows("orders");document.getElementById("orders").innerHTML=`<div class="sectionhead"><h2>Orders</h2><button class="btn" onclick="openForm('order')">+ New Order</button></div>${d.length?`<div class="tablewrap"><table class="table"><tr><th>Order</th><th>Amount</th><th>Status</th><th>Payment</th><th>Action</th></tr>${d.map(x=>`<tr><td>#${esc(String(x.id||"").slice(0,8))} ${esc(x.item)}</td><td>${money(x.amount)}</td><td><span class="badge">${esc(x.status||"Processing")}</span></td><td><span class="badge ${String(x.payment_status).toLowerCase()==="paid"?"success":""}">${esc(x.payment_status||"Pending")}</span></td><td><div class="row-actions"><button class="btn small" onclick="updateOrder('${x.id}','Delivered')">Delivered</button><button class="btn small" onclick="updateOrderPayment('${x.id}','Paid')">Paid</button></div></td></tr>`).join("")}</table></div>`:`<div class="panel empty">No orders yet. Create your first order.</div>`}`}
-async function renderFollowups(){const d=await rows("followups");document.getElementById("followups").innerHTML=`<div class="sectionhead"><h2>Follow Ups</h2><button class="btn" onclick="openForm('followup')">+ Schedule Follow Up</button></div>${d.length?`<div class="tablewrap"><table class="table"><tr><th>Note</th><th>Date</th><th>Status</th><th>Action</th></tr>${d.map(x=>`<tr><td>${esc(x.note)}</td><td>${esc(x.followup_date)}</td><td><span class="badge ${x.done?"success":""}">${x.done?"Done":"Open"}</span></td><td>${x.done?"":`<button class="btn small" onclick="completeFollowup('${x.id}')">Mark done</button>`}</td></tr>`).join("")}</table></div>`:`<div class="panel empty">No follow ups yet.</div>`}`}
-async function renderTasks(){const d=await rows("tasks");document.getElementById("tasks").innerHTML=`<div class="sectionhead"><h2>Tasks</h2><button class="btn" onclick="openForm('task')">+ New Task</button></div>${d.length?`<div class="tablewrap"><table class="table"><tr><th>Task</th><th>Due</th><th>Priority</th><th>Status</th><th>Action</th></tr>${d.map(x=>`<tr><td>${esc(x.title)}</td><td>${esc(x.due_date)}</td><td>${esc(x.priority)}</td><td><span class="badge">${esc(x.status||"To Do")}</span></td><td><button class="btn small" onclick="completeTask('${x.id}')">Done</button></td></tr>`).join("")}</table></div>`:`<div class="panel empty">No tasks yet.</div>`}`}
-async function renderPayments(){const d=await rows("payments");document.getElementById("payments").innerHTML=`<div class="sectionhead"><h2>Payments</h2><button class="btn" onclick="openForm('payment')">+ Record Payment</button></div>${d.length?`<div class="tablewrap"><table class="table"><tr><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr>${d.map(x=>`<tr><td>${money(x.amount)}</td><td>${esc(x.method)}</td><td><span class="badge ${String(x.status).toLowerCase()==="paid"?"success":""}">${esc(x.status||"Paid")}</span></td><td>${x.payment_date?esc(x.payment_date):x.created_at?new Date(x.created_at).toLocaleDateString():""}</td></tr>`).join("")}</table></div>`:`<div class="panel empty">No payments yet.</div>`}`}
-async function renderInvoices(){const d=await rows("invoices");document.getElementById("invoices").innerHTML=`<div class="sectionhead"><h2>Invoices</h2><button class="btn gold" onclick="openForm('invoice')">+ Create Invoice</button></div>${d.length?`<div class="tablewrap"><table class="table"><tr><th>Invoice</th><th>Amount</th><th>Due</th><th>Status</th><th>Action</th></tr>${d.map(x=>{const overdue=x.due_date&&new Date(x.due_date)<new Date()&&!['paid','cancelled'].includes(String(x.status||"").toLowerCase());return `<tr><td>${esc(x.invoice_number)}</td><td>${money(x.amount)}</td><td>${esc(x.due_date)}</td><td><span class="badge ${overdue?"danger":String(x.status).toLowerCase()==="paid"?"success":""}">${overdue?"overdue":esc(x.status||"draft")}</span></td><td>${String(x.status).toLowerCase()==="paid"?"":`<button class="btn small" onclick="markInvoicePaid('${x.id}')">Mark paid</button>`}</td></tr>`}).join("")}</table></div>`:`<div class="panel empty">No invoices yet.</div>`}`}
-async function renderSales(){const d=await rows("payments"),paid=d.filter(x=>String(x.status||"").toLowerCase()==="paid").reduce((a,x)=>a+Number(x.amount||0),0),pending=d.filter(x=>String(x.status||"").toLowerCase()!=="paid").reduce((a,x)=>a+Number(x.amount||0),0);document.getElementById("sales").innerHTML=`<div class="grid"><div class="card"><div class="muted">Total collected</div><div class="stat">${money(paid)}</div></div><div class="card"><div class="muted">Pending payments</div><div class="stat">${money(pending)}</div></div></div><div class="panel section"><h2 style="margin-top:0">Sales insights</h2><p class="muted">Use the Payments and Orders sections to track what has been collected and what is still pending.</p></div>`}
-async function renderTeam(){const d=await rows("business_members");document.getElementById("team").innerHTML=`<div class="sectionhead"><h2>Team</h2><button class="btn" onclick="openForm('team')">+ Add Member</button></div><div class="panel section"><p class="muted" style="margin-top:0">Add an existing KabFlow user's Supabase user ID. Email invitations require a backend invite flow and are not performed from this browser only MVP.</p></div>${d.length?`<div class="tablewrap"><table class="table"><tr><th>User ID</th><th>Role</th></tr>${d.map(x=>`<tr><td>${esc(x.user_id)}</td><td>${esc(x.role)}</td></tr>`).join("")}</table></div>`:""}`}
-function wa(phone,name){const p=decodeURIComponent(phone||"").replace(/\D/g,"");const n=decodeURIComponent(name||"");if(!p){alert("This customer does not have a valid phone number.");return}window.open("https://wa.me/"+p+"?text="+encodeURIComponent("Hello "+n+", "),"_blank","noopener")}
-function closeModal(){document.getElementById("modal").classList.remove("show")}
-function field(label,id,type="text",placeholder=""){return `<div class="formrow"><label for="${id}">${label}</label><input id="${id}" class="input" type="${type}" placeholder="${placeholder}"></div>`}
-async function customerOptions(){const c=await rows("customers");return `<option value="">No customer selected</option>`+c.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join("")}
-async function openForm(type){let title="",body="";if(type==="customer"){title="Add Customer";body=field("Name","f1","text","Customer name")+field("WhatsApp","f2","tel","Phone number")+`<div class="formrow"><label for="f3">Value</label><input id="f3" class="input" type="number" min="0" placeholder="0"></div><div class="formrow"><label for="f4">Notes</label><textarea id="f4" class="input" rows="3"></textarea></div><button class="btn gold" onclick="saveCustomer()">Save Customer</button>`}
-else if(type==="order"){title="New Order";body=field("Item / Order","f1","text","What was ordered")+`<div class="formrow"><label for="f2">Customer</label><select id="f2" class="input">${await customerOptions()}</select></div>`+field("Amount","f3","number","0")+`<div class="formrow"><label for="f4">Status</label><select id="f4" class="input"><option>Processing</option><option>Confirmed</option><option>Delivered</option><option>Cancelled</option></select></div><button class="btn gold" onclick="saveOrder()">Create Order</button>`}
-else if(type==="payment"){title="Record Payment";body=field("Amount","f1","number","0")+`<div class="formrow"><label for="f2">Customer</label><select id="f2" class="input">${await customerOptions()}</select></div>`+field("Method","f3","text","Cash, transfer, card")+`<div class="formrow"><label for="f4">Status</label><select id="f4" class="input"><option>Paid</option><option>Pending</option><option>Failed</option></select></div><button class="btn gold" onclick="savePayment()">Record Payment</button>`}
-else if(type==="invoice"){title="Create Invoice";body=field("Invoice Number","f1","text","INV-001")+`<div class="formrow"><label for="f2">Customer</label><select id="f2" class="input">${await customerOptions()}</select></div>`+field("Amount","f3","number","0")+field("Due Date","f4","date")+`<div class="formrow"><label for="f5">Notes</label><textarea id="f5" class="input" rows="3"></textarea></div><button class="btn gold" onclick="saveInvoice()">Create Invoice</button>`}
-else if(type==="followup"){title="Schedule Follow Up";body=field("Note","f1","text","What should you follow up about")+`<div class="formrow"><label for="f2">Customer</label><select id="f2" class="input">${await customerOptions()}</select></div>`+field("Date","f3","date")+`<button class="btn gold" onclick="saveFollowup()">Schedule Follow Up</button>`}
-else if(type==="task"){title="New Task";body=field("Task","f1","text","Task title")+field("Due Date","f2","date")+`<div class="formrow"><label for="f3">Priority</label><select id="f3" class="input"><option>Low</option><option selected>Medium</option><option>High</option></select></div><button class="btn gold" onclick="saveTask()">Save Task</button>`}
-else if(type==="team"){title="Add Team Member";body=field("Supabase User ID","f1","text","UUID of the user")+`<div class="formrow"><label for="f2">Role</label><select id="f2" class="input"><option>Staff</option><option>Manager</option><option>Owner</option></select></div><button class="btn gold" onclick="saveTeam()">Add Member</button>`}
-document.getElementById("modalTitle").textContent=title;document.getElementById("modalBody").innerHTML=`<div class="modalform">${body}</div>`;document.getElementById("modal").classList.add("show")}
-async function insert(table,obj){const r=await sb.from(table).insert({...obj,business_id:business.id});if(r.error){alert(r.error.message);return false}closeModal();await renderAll();return true}
-async function saveCustomer(){const ok=await insert("customers",{name:f1.value.trim(),phone:f2.value.trim(),value:Number(f3.value||0),notes:f4.value.trim(),status:"Potential"});if(!ok)return}
-async function saveOrder(){await insert("orders",{item:f1.value.trim(),customer_id:f2.value||null,amount:Number(f3.value||0),status:f4.value,payment_status:"Pending"})}
-async function savePayment(){await insert("payments",{amount:Number(f1.value||0),customer_id:f2.value||null,method:f3.value.trim(),status:f4.value,payment_date:new Date().toISOString().slice(0,10)})}
-async function saveInvoice(){await insert("invoices",{invoice_number:f1.value.trim(),customer_id:f2.value||null,amount:Number(f3.value||0),due_date:f4.value||null,status:"draft",notes:f5.value.trim()})}
-async function saveFollowup(){await insert("followups",{customer_id:f2.value||null,note:f1.value.trim(),followup_date:f3.value||null,done:false})}
-async function saveTask(){await insert("tasks",{title:f1.value.trim(),due_date:f2.value||null,priority:f3.value,status:"To Do"})}
-async function saveTeam(){const r=await sb.from("business_members").insert({business_id:business.id,user_id:f1.value.trim(),role:f2.value});if(r.error){alert(r.error.message);return}closeModal();await renderAll()}
-async function updateOrder(id,status){const r=await sb.from("orders").update({status}).eq("id",id).eq("business_id",business.id);if(r.error)alert(r.error.message);else await renderAll()}
-async function updateOrderPayment(id,status){const r=await sb.from("orders").update({payment_status:status}).eq("id",id).eq("business_id",business.id);if(r.error)alert(r.error.message);else await renderAll()}
-async function completeFollowup(id){const r=await sb.from("followups").update({done:true}).eq("id",id).eq("business_id",business.id);if(r.error)alert(r.error.message);else await renderAll()}
-async function completeTask(id){const r=await sb.from("tasks").update({status:"Done"}).eq("id",id).eq("business_id",business.id);if(r.error)alert(r.error.message);else await renderAll()}
-async function markInvoicePaid(id){const r=await sb.from("invoices").update({status:"paid",paid_at:new Date().toISOString()}).eq("id",id).eq("business_id",business.id);if(r.error)alert(r.error.message);else await renderAll()}
-async function startVoice(){if(!navigator.mediaDevices?.getUserMedia){alert("Voice recording is not supported in this browser.");return}if(mediaRecorder?.state==="recording"){mediaRecorder.stop();document.getElementById("voiceBtn").textContent="Voice note";return}try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});audioChunks=[];mediaRecorder=new MediaRecorder(stream);mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);mediaRecorder.onstop=async()=>{stream.getTracks().forEach(t=>t.stop());const blob=new Blob(audioChunks,{type:"audio/webm"});const path=business.id+"/"+Date.now()+".webm";const r=await sb.storage.from("voice-notes").upload(path,blob,{contentType:"audio/webm"});if(r.error)alert("Voice note could not be uploaded: "+r.error.message);else alert("Voice note uploaded successfully.")};mediaRecorder.start();document.getElementById("voiceBtn").textContent="Stop recording"}catch(e){alert("Microphone access was not available.")}}
 
-sb.auth.getSession().then(async({data})=>{if(data.session)await boot()});
-sb.auth.onAuthStateChange(async(event,session)=>{if(event==="PASSWORD_RECOVERY"){authMessage("Password recovery is ready. Enter your new password in the recovery flow.","success")}if(event==="SIGNED_OUT"){location.reload()}});
+function esc(v){
+  return String(v??"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function money(v){
+  return "₦"+Number(v||0).toLocaleString();
+}
+
+function authMessage(text,type=""){
+  const el=document.getElementById("authMsg");
+  el.textContent=text;
+  el.className="message"+(type?" "+type:"");
+  el.classList.remove("hidden");
+}
+
+function setupMessage(text,type=""){
+  const el=document.getElementById("setupMsg");
+  el.textContent=text;
+  el.className="message"+(type?" "+type:"");
+  el.classList.remove("hidden");
+}
+
+function setAuthMode(mode){
+  authMode=mode;
+
+  const signup=mode==="signup";
+
+  document.getElementById("authTitle").textContent=signup?"Create your account":"Welcome back";
+  document.getElementById("authIntro").textContent=signup
+    ?"Get started and manage your customers, orders, payments and follow ups easily."
+    :"Sign in to continue to your KabFlow business dashboard.";
+
+  document.getElementById("nameRow").classList.toggle("hidden",!signup);
+  document.getElementById("confirmRow").classList.toggle("hidden",!signup);
+  document.getElementById("forgotRow").classList.toggle("hidden",signup);
+
+  document.getElementById("authBtn").textContent=signup?"Create account":"Sign in";
+
+  document.getElementById("switchText").textContent=signup
+    ?"Already have an account?"
+    :"Do not have an account?";
+
+  document.getElementById("switchBtn").textContent=signup?"Sign in":"Create account";
+}
+
+function toggleAuthMode(){
+  setAuthMode(authMode==="signup"?"login":"signup");
+  document.getElementById("authMsg").classList.add("hidden");
+}
+
+function togglePassword(){
+  const input=document.getElementById("password");
+  const btn=document.querySelector(".showpass");
+
+  if(input.type==="password"){
+    input.type="text";
+    btn.textContent="Hide";
+  }else{
+    input.type="password";
+    btn.textContent="Show";
+  }
+}
+
+async function handleAuth(){
+
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value;
+
+  if(!email||!password){
+    authMessage("Please enter your email and password.","error");
+    return;
+  }
+
+  const btn=document.getElementById("authBtn");
+  btn.disabled=true;
+
+  if(authMode==="signup"){
+
+    const fullName=document.getElementById("fullName").value.trim();
+    const confirm=document.getElementById("confirmPassword").value;
+
+    if(!fullName){
+      authMessage("Please enter your full name.","error");
+      btn.disabled=false;
+      return;
+    }
+
+    if(password.length<6){
+      authMessage("Password must be at least 6 characters.","error");
+      btn.disabled=false;
+      return;
+    }
+
+    if(password!==confirm){
+      authMessage("Passwords do not match.","error");
+      btn.disabled=false;
+      return;
+    }
+
+    const {data,error}=await sb.auth.signUp({
+      email,
+      password,
+      options:{
+        data:{
+          full_name:fullName
+        }
+      }
+    });
+
+    if(error){
+      authMessage(error.message,"error");
+      btn.disabled=false;
+      return;
+    }
+
+    if(data.session){
+      currentUser=data.user;
+      await boot();
+    }else{
+      authMessage("Account created. Check your email if confirmation is required.","success");
+    }
+
+  }else{
+
+    const {data,error}=await sb.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if(error){
+      authMessage(error.message,"error");
+      btn.disabled=false;
+      return;
+    }
+
+    currentUser=data.user;
+    await boot();
+  }
+
+  btn.disabled=false;
+}
+
+async function forgotPassword(){
+
+  const email=document.getElementById("email").value.trim();
+
+  if(!email){
+    authMessage("Enter your email address first.","error");
+    return;
+  }
+
+  const {error}=await sb.auth.resetPasswordForEmail(email,{
+    redirectTo:location.origin
+  });
+
+  if(error){
+    authMessage(error.message,"error");
+  }else{
+    authMessage("Password reset instructions have been sent to your email.","success");
+  }
+}
+
+async function boot(){
+
+  const {data:{user}}=await sb.auth.getUser();
+
+  if(!user){
+    location.reload();
+    return;
+  }
+
+  currentUser=user;
+
+  const r=await sb.from("businesses")
+    .select("*")
+    .eq("owner_id",user.id)
+    .order("created_at",{ascending:false})
+    .limit(1)
+    .maybeSingle();
+
+  if(r.error){
+    authMessage(r.error.message,"error");
+    return;
+  }
+
+  if(!r.data){
+
+    const created=await sb.from("businesses")
+      .insert({
+        name:"My Business",
+        owner_id:user.id,
+        currency:"₦"
+      })
+      .select("*")
+      .maybeSingle();
+
+    if(created.error){
+      authMessage(created.error.message,"error");
+      return;
+    }
+
+    business=created.data;
+
+  }else{
+    business=r.data;
+  }
+
+  if(!business.setup_complete){
+    showSetup();
+  }else{
+    showApp();
+  }
+}
+
+function showSetup(){
+
+  document.getElementById("auth").classList.add("hidden");
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("setup").classList.remove("hidden");
+
+  document.getElementById("businessName").value=business.name||"";
+  document.getElementById("businessPhone").value=business.phone||"";
+  document.getElementById("businessEmail").value=business.owner_email||currentUser.email||"";
+  document.getElementById("businessAddress").value=business.address||"";
+  document.getElementById("businessType").value=business.business_type||"";
+}
+
+async function saveBusinessSetup(){
+
+  const name=document.getElementById("businessName").value.trim();
+  const phone=document.getElementById("businessPhone").value.trim();
+  const email=document.getElementById("businessEmail").value.trim();
+  const address=document.getElementById("businessAddress").value.trim();
+  const type=document.getElementById("businessType").value;
+
+  if(!name){
+    setupMessage("Please enter your business name.","error");
+    return;
+  }
+
+  const r=await sb.from("businesses")
+    .update({
+      owner_name:currentUser.user_metadata?.full_name||"",
+      owner_email:email,
+      name,
+      phone,
+      address,
+      business_type:type,
+      setup_complete:true
+    })
+    .eq("id",business.id)
+    .eq("owner_id",currentUser.id);
+
+  if(r.error){
+    setupMessage(r.error.message,"error");
+    return;
+  }
+
+  const refreshed=await sb.from("businesses")
+    .select("*")
+    .eq("id",business.id)
+    .eq("owner_id",currentUser.id)
+    .maybeSingle();
+
+  if(refreshed.error){
+    setupMessage(refreshed.error.message,"error");
+    return;
+  }
+
+  if(!refreshed.data){
+    setupMessage("Business could not be loaded after saving.","error");
+    return;
+  }
+
+  business=refreshed.data;
+
+  showApp();
+}
+
+function backToSignIn(){
+
+  document.getElementById("setup").classList.add("hidden");
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("auth").classList.remove("hidden");
+
+  setAuthMode("login");
+
+  document.getElementById("authMsg").innerHTML="";
+}
+
+function showApp(){
+
+  document.getElementById("auth").classList.add("hidden");
+  document.getElementById("setup").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+
+  document.getElementById("businessPill").textContent=business?.name||"";
+
+  renderAll();
+}
+
+async function signOut(){
+  await sb.auth.signOut();
+}
+
+function showScreen(name){
+
+  document.querySelectorAll(".screen").forEach(x=>{
+    x.classList.remove("active");
+  });
+
+  const target=document.getElementById(name);
+
+  if(target){
+    target.classList.add("active");
+  }
+
+  document.querySelectorAll(".navbtn").forEach(x=>{
+    x.classList.toggle("active",x.dataset.screen===name);
+  });
+
+  const titles={
+    dashboard:"Dashboard",
+    customers:"Customers",
+    orders:"Orders",
+    payments:"Payments",
+    invoices:"Invoices",
+    followups:"Follow Ups",
+    tasks:"Tasks",
+    sales:"Sales Insights",
+    team:"Team"
+  };
+
+  document.getElementById("screenTitle").textContent=titles[name]||"KabFlow";
+}
+
+async function rows(table){
+
+  const r=await sb.from(table)
+    .select("*")
+    .eq("business_id",business.id)
+    .order("created_at",{ascending:false});
+
+  if(r.error){
+    console.error(r.error);
+    return [];
+  }
+
+  return r.data||[];
+}
+
+async function renderAll(){
+
+  await Promise.all([
+    renderDashboard(),
+    renderCustomers(),
+    renderOrders(),
+    renderPayments(),
+    renderInvoices(),
+    renderFollowups(),
+    renderTasks(),
+    renderSales(),
+    renderTeam()
+  ]);
+}
+
+async function renderDashboard(){
+
+  const customers=await rows("customers");
+  const orders=await rows("orders");
+  const payments=await rows("payments");
+  const invoices=await rows("invoices");
+
+  const collected=payments
+    .filter(x=>String(x.status||"").toLowerCase()==="paid")
+    .reduce((a,x)=>a+Number(x.amount||0),0);
+
+  const unpaid=invoices
+    .filter(x=>String(x.status||"").toLowerCase()!=="paid")
+    .reduce((a,x)=>a+Number(x.amount||0),0);
+
+  document.getElementById("dashboard").innerHTML=`
+
+    <div class="grid">
+
+      <div class="card">
+        <div class="muted">Customers</div>
+        <div class="stat">${customers.length}</div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Orders</div>
+        <div class="stat">${orders.length}</div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Collected</div>
+        <div class="stat">${money(collected)}</div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Outstanding</div>
+        <div class="stat">${money(unpaid)}</div>
+      </div>
+
+    </div>
+
+    <div class="panel section">
+      <div class="sectionhead">
+        <h2>Quick actions</h2>
+
+        <div class="actions">
+          <button class="btn gold" onclick="openForm('customer')">Add Customer</button>
+          <button class="btn" onclick="openForm('order')">New Order</button>
+          <button class="btn" onclick="openForm('payment')">Record Payment</button>
+          <button class="btn" onclick="openForm('invoice')">Create Invoice</button>
+        </div>
+      </div>
+
+      <p class="muted">
+        Manage your customers, orders, payments, invoices and follow ups from one place.
+      </p>
+    </div>
+  `;
+}
+
+async function renderCustomers(){
+
+  const d=await rows("customers");
+
+  document.getElementById("customers").innerHTML=`
+
+    <div class="sectionhead">
+      <h2>Customers</h2>
+      <button class="btn gold" onclick="openForm('customer')">+ Add Customer</button>
+    </div>
+
+    ${d.length?`
+
+      <div class="tablewrap">
+
+        <table class="table">
+
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Value</th>
+            <th>Status</th>
+            <th>WhatsApp</th>
+          </tr>
+
+          ${d.map(x=>`
+
+            <tr>
+
+              <td>${esc(x.name)}</td>
+              <td>${esc(x.phone)}</td>
+              <td>${money(x.value)}</td>
+              <td><span class="badge">${esc(x.status||"")}</span></td>
+
+              <td>
+                <button class="btn small" onclick="wa('${encodeURIComponent(x.phone||"")}','${encodeURIComponent(x.name||"")}')">
+                  WhatsApp
+                </button>
+              </td>
+
+            </tr>
+
+          `).join("")}
+
+        </table>
+
+      </div>
+
+    `:`<div class="panel empty">No customers yet.</div>`}
+  `;
+}
+
+async function renderOrders(){
+
+  const d=await rows("orders");
+
+  document.getElementById("orders").innerHTML=`
+
+    <div class="sectionhead">
+      <h2>Orders</h2>
+      <button class="btn gold" onclick="openForm('order')">+ New Order</button>
+    </div>
+
+    ${d.length?`
+
+      <div class="tablewrap">
+
+        <table class="table">
+
+          <tr>
+            <th>Item</th>
+            <th>Amount</th>
+            <th>Order Status</th>
+            <th>Payment Status</th>
+            <th>Actions</th>
+          </tr>
+
+          ${d.map(x=>`
+
+            <tr>
+
+              <td>${esc(x.item)}</td>
+
+              <td>${money(x.amount)}</td>
+
+              <td>
+                <span class="badge">${esc(x.status||"")}</span>
+              </td>
+
+              <td>
+                <span class="badge ${
+                  String(x.payment_status||"").toUpperCase()==="PAID"
+                    ?"success"
+                    :String(x.payment_status||"").toUpperCase()==="PARTIALLY PAID"
+                    ?""
+                    :"danger"
+                }">
+                  ${esc(String(x.payment_status||"UNPAID").toUpperCase())}
+                </span>
+              </td>
+
+              <td>
+
+                <div class="row-actions">
+
+                  <button class="btn small" onclick="updateOrder('${x.id}','Delivered')">
+                    Delivered
+                  </button>
+
+                  <button class="btn small" onclick="updateOrderPayment('${x.id}','UNPAID')">
+                    Unpaid
+                  </button>
+
+                  <button class="btn small" onclick="updateOrderPayment('${x.id}','PARTIALLY PAID')">
+                    Partially Paid
+                  </button>
+
+                  <button class="btn small" onclick="updateOrderPayment('${x.id}','PAID')">
+                    Paid
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          `).join("")}
+
+        </table>
+
+      </div>
+
+    `:`<div class="panel empty">No orders yet.</div>`}
+  `;
+}
+
+async function renderPayments(){
+
+  const d=await rows("payments");
+
+  document.getElementById("payments").innerHTML=`
+
+    <div class="sectionhead">
+      <h2>Payments</h2>
+      <button class="btn gold" onclick="openForm('payment')">+ Record Payment</button>
+    </div>
+
+    ${d.length?`
+
+      <div class="tablewrap">
+
+        <table class="table">
+
+          <tr>
+            <th>Amount</th>
+            <th>Method</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+
+          ${d.map(x=>`
+
+            <tr>
+              <td>${money(x.amount)}</td>
+              <td>${esc(x.method)}</td>
+              <td><span class="badge">${esc(x.status||"")}</span></td>
+              <td>${esc(x.payment_date||"")}</td>
+            </tr>
+
+          `).join("")}
+
+        </table>
+
+      </div>
+
+    `:`<div class="panel empty">No payments yet.</div>`}
+  `;
+}
+
+async function renderInvoices(){
+
+  const d=await rows("invoices");
+
+  document.getElementById("invoices").innerHTML=`
+
+    <div class="sectionhead">
+      <h2>Invoices</h2>
+      <button class="btn gold" onclick="openForm('invoice')">+ Create Invoice</button>
+    </div>
+
+    ${d.length?`
+
+      <div class="tablewrap">
+
+        <table class="table">
+
+          <tr>
+            <th>Invoice</th>
+            <th>Amount</th>
+            <th>Due</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+
+          ${d.map(x=>{
+
+            const overdue=
+              x.due_date &&
+              new Date(x.due_date)<new Date() &&
+              !["paid","cancelled"].includes(String(x.status||"").toLowerCase());
+
+            return `
+
+              <tr>
+
+                <td>${esc(x.invoice_number)}</td>
+
+                <td>${money(x.amount)}</td>
+
+                <td>${esc(x.due_date)}</td>
+
+                <td>
+                  <span class="badge ${
+                    overdue
+                      ?"danger"
+                      :String(x.status).toLowerCase()==="paid"
+                      ?"success"
+                      :""
+                  }">
+                    ${overdue?"overdue":esc(x.status||"draft")}
+                  </span>
+                </td>
+
+                <td>
+                  ${
+                    String(x.status).toLowerCase()==="paid"
+                      ?""
+                      :`<button class="btn small" onclick="markInvoicePaid('${x.id}')">Mark paid</button>`
+                  }
+                </td>
+
+              </tr>
+            `
+
+          }).join("")}
+
+        </table>
+
+      </div>
+
+    `:`<div class="panel empty">No invoices yet.</div>`}
+  `;
+}
+
+async function renderFollowups(){
+
+  const d=await rows("followups");
+
+  document.getElementById("followups").innerHTML=`
+
+    <div class="sectionhead">
+      <h2>Follow Ups</h2>
+      <button class="btn gold" onclick="openForm('followup')">+ Schedule Follow Up</button>
+    </div>
+
+    ${d.length?`
+
+      <div class="tablewrap">
+
+        <table class="table">
+
+          <tr>
+            <th>Note</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+
+          ${d.map(x=>`
+
+            <tr>
+
+              <td>${esc(x.note)}</td>
+              <td>${esc(x.followup_date)}</td>
+
+              <td>
+                <span class="badge ${x.done?"success":""}">
+                  ${x.done?"Done":"Pending"}
+                </span>
+              </td>
+
+              <td>
+                ${
+                  x.done
+                    ?""
+                    :`<button class="btn small" onclick="completeFollowup('${x.id}')">Mark done</button>`
+                }
+              </td>
+
+            </tr>
+
+          `).join("")}
+
+        </table>
+
+      </div>
+
+    `:`<div class="panel empty">No follow ups yet.</div>`}
+  `;
+}
+
+async function renderTasks(){
+
+  const d=await rows("tasks");
+
+  document.getElementById("tasks").innerHTML=`
+
+    <div class="sectionhead">
+      <h2>Tasks</h2>
+      <button class="btn gold" onclick="openForm('task')">+ New Task</button>
+    </div>
+
+    ${d.length?`
+
+      <div class="tablewrap">
+
+        <table class="table">
+
+          <tr>
+            <th>Task</th>
+            <th>Due</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+
+          ${d.map(x=>`
+
+            <tr>
+
+              <td>${esc(x.title)}</td>
+              <td>${esc(x.due_date)}</td>
+              <td>${esc(x.priority)}</td>
+
+              <td>
+                <span class="badge ${x.status==="Done"?"success":""}">
+                  ${esc(x.status)}
+                </span>
+              </td>
+
+              <td>
+                ${
+                  x.status==="Done"
+                    ?""
+                    :`<button class="btn small" onclick="completeTask('${x.id}')">Mark Done</button>`
+                }
+              </td>
+
+            </tr>
+
+          `).join("")}
+
+        </table>
+
+      </div>
+
+    `:`<div class="panel empty">No tasks yet.</div>`}
+  `;
+}
+
+async function renderSales(){
+
+  const d=await rows("payments");
+
+  const paid=d
+    .filter(x=>String(x.status||"").toLowerCase()==="paid")
+    .reduce((a,x)=>a+Number(x.amount||0),0);
+
+  const pending=d
+    .filter(x=>String(x.status||"").toLowerCase()!=="paid")
+    .reduce((a,x)=>a+Number(x.amount||0),0);
+
+  document.getElementById("sales").innerHTML=`
+
+    <div class="grid">
+
+      <div class="card">
+        <div class="muted">Total collected</div>
+        <div class="stat">${money(paid)}</div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Pending payments</div>
+        <div class="stat">${money(pending)}</div>
+      </div>
+
+    </div>
+
+    <div class="panel section">
+
+      <h2 style="margin-top:0">Sales insights</h2>
+
+      <p class="muted">
+        Use the Payments and Orders sections to track what has been collected and what is still pending.
+      </p>
+
+    </div>
+  `;
+}
+
+async function renderTeam(){
+
+  const d=await rows("business_members");
+
+  document.getElementById("team").innerHTML=`
+
+    <div class="sectionhead">
+
+      <h2>Team</h2>
+
+      <button class="btn" onclick="openForm('team')">
+        + Add Member
+      </button>
+
+    </div>
+
+    <div class="panel section">
+
+      <p class="muted" style="margin-top:0">
+        Add an existing KabFlow user's Supabase user ID.
+        Email invitations require a backend invite flow and are not performed from this browser only MVP.
+      </p>
+
+    </div>
+
+    ${
+      d.length
+        ?`
+          <div class="tablewrap">
+
+            <table class="table">
+
+              <tr>
+                <th>User ID</th>
+                <th>Role</th>
+              </tr>
+
+              ${d.map(x=>`
+
+                <tr>
+                  <td>${esc(x.user_id)}</td>
+                  <td>${esc(x.role)}</td>
+                </tr>
+
+              `).join("")}
+
+            </table>
+
+          </div>
+        `
+        :""
+    }
+  `;
+}
+
+function wa(phone,name){
+
+  const p=decodeURIComponent(phone||"").replace(/\D/g,"");
+  const n=decodeURIComponent(name||"");
+
+  if(!p){
+    alert("This customer does not have a valid phone number.");
+    return;
+  }
+
+  window.open(
+    "https://wa.me/"+p+"?text="+encodeURIComponent("Hello "+n+", "),
+    "_blank",
+    "noopener"
+  );
+}
+
+function closeModal(){
+  document.getElementById("modal").classList.remove("show");
+}
+
+function field(label,id,type="text",placeholder=""){
+
+  return `
+    <div class="formrow">
+      <label for="${id}">${label}</label>
+      <input id="${id}" class="input" type="${type}" placeholder="${placeholder}">
+    </div>
+  `;
+}
+
+async function customerOptions(){
+
+  const c=await rows("customers");
+
+  return `
+    <option value="">No customer selected</option>
+    ${
+      c.map(x=>`
+        <option value="${esc(x.id)}">${esc(x.name)}</option>
+      `).join("")
+    }
+  `;
+}
+
+async function openForm(type){
+
+  let title="";
+  let body="";
+
+  if(type==="customer"){
+
+    title="Add Customer";
+
+    body=
+      field("Name","f1","text","Customer name")+
+      field("WhatsApp","f2","tel","Phone number")+
+      `
+        <div class="formrow">
+          <label for="f3">Value</label>
+          <input id="f3" class="input" type="number" min="0" placeholder="0">
+        </div>
+
+        <div class="formrow">
+          <label for="f4">Notes</label>
+          <textarea id="f4" class="input" rows="3"></textarea>
+        </div>
+
+        <button class="btn gold" onclick="saveCustomer()">
+          Save Customer
+        </button>
+      `;
+  }
+
+  else if(type==="order"){
+
+    title="New Order";
+
+    body=
+      field("Item / Order","f1","text","What was ordered")+
+      `
+        <div class="formrow">
+          <label for="f2">Customer</label>
+          <select id="f2" class="input">
+            ${await customerOptions()}
+          </select>
+        </div>
+      `+
+      field("Amount","f3","number","0")+
+      `
+        <div class="formrow">
+
+          <label for="f4">Order Status</label>
+
+          <select id="f4" class="input">
+            <option>Processing</option>
+            <option>Confirmed</option>
+            <option>Delivered</option>
+            <option>Cancelled</option>
+          </select>
+
+        </div>
+
+        <div class="formrow">
+
+          <label for="f5">Payment Status</label>
+
+          <select id="f5" class="input">
+
+            <option value="UNPAID">UNPAID</option>
+
+            <option value="PARTIALLY PAID">
+              PARTIALLY PAID
+            </option>
+
+            <option value="PAID">
+              PAID
+            </option>
+
+          </select>
+
+        </div>
+
+        <button class="btn gold" onclick="saveOrder()">
+          Create Order
+        </button>
+      `;
+  }
+
+  else if(type==="payment"){
+
+    title="Record Payment";
+
+    body=
+      field("Amount","f1","number","0")+
+      `
+        <div class="formrow">
+          <label for="f2">Customer</label>
+          <select id="f2" class="input">
+            ${await customerOptions()}
+          </select>
+        </div>
+      `+
+      field("Method","f3","text","Cash, transfer, card")+
+      `
+        <div class="formrow">
+
+          <label for="f4">Status</label>
+
+          <select id="f4" class="input">
+            <option>Paid</option>
+            <option>Pending</option>
+            <option>Failed</option>
+          </select>
+
+        </div>
+
+        <button class="btn gold" onclick="savePayment()">
+          Record Payment
+        </button>
+      `;
+  }
+
+  else if(type==="invoice"){
+
+    title="Create Invoice";
+
+    body=
+      field("Invoice Number","f1","text","INV-001")+
+      `
+        <div class="formrow">
+
+          <label for="f2">Customer</label>
+
+          <select id="f2" class="input">
+            ${await customerOptions()}
+          </select>
+
+        </div>
+      `+
+      field("Amount","f3","number","0")+
+      field("Due Date","f4","date")+
+      `
+        <div class="formrow">
+
+          <label for="f5">Notes</label>
+
+          <textarea id="f5" class="input" rows="3"></textarea>
+
+        </div>
+
+        <button class="btn gold" onclick="saveInvoice()">
+          Create Invoice
+        </button>
+      `;
+  }
+
+  else if(type==="followup"){
+
+    title="Schedule Follow Up";
+
+    body=
+      field("Note","f1","text","What should you follow up about")+
+      `
+        <div class="formrow">
+
+          <label for="f2">Customer</label>
+
+          <select id="f2" class="input">
+            ${await customerOptions()}
+          </select>
+
+        </div>
+      `+
+      field("Date","f3","date")+
+      `
+        <button class="btn gold" onclick="saveFollowup()">
+          Schedule Follow Up
+        </button>
+      `;
+  }
+
+  else if(type==="task"){
+
+    title="New Task";
+
+    body=
+      field("Task","f1","text","Task title")+
+      field("Due Date","f2","date")+
+      `
+        <div class="formrow">
+
+          <label for="f3">Priority</label>
+
+          <select id="f3" class="input">
+            <option>Low</option>
+            <option selected>Medium</option>
+            <option>High</option>
+          </select>
+
+        </div>
+
+        <button class="btn gold" onclick="saveTask()">
+          Save Task
+        </button>
+      `;
+  }
+
+  else if(type==="team"){
+
+    title="Add Team Member";
+
+    body=
+      field("Supabase User ID","f1","text","UUID of the user")+
+      `
+        <div class="formrow">
+
+          <label for="f2">Role</label>
+
+          <select id="f2" class="input">
+            <option>Staff</option>
+            <option>Manager</option>
+            <option>Owner</option>
+          </select>
+
+        </div>
+
+        <button class="btn gold" onclick="saveTeam()">
+          Add Member
+        </button>
+      `;
+  }
+
+  document.getElementById("modalTitle").textContent=title;
+
+  document.getElementById("modalBody").innerHTML=
+    `<div class="modalform">${body}</div>`;
+
+  document.getElementById("modal").classList.add("show");
+}
+
+async function insert(table,obj){
+
+  const r=await sb.from(table)
+    .insert({
+      ...obj,
+      business_id:business.id
+    });
+
+  if(r.error){
+    alert(r.error.message);
+    return false;
+  }
+
+  closeModal();
+  await renderAll();
+
+  return true;
+}
+
+async function saveCustomer(){
+
+  const ok=await insert("customers",{
+    name:f1.value.trim(),
+    phone:f2.value.trim(),
+    value:Number(f3.value||0),
+    notes:f4.value.trim(),
+    status:"Potential"
+  });
+
+  if(!ok)return;
+}
+
+async function saveOrder(){
+
+  await insert("orders",{
+    item:f1.value.trim(),
+    customer_id:f2.value||null,
+    amount:Number(f3.value||0),
+    status:f4.value,
+    payment_status:f5.value
+  });
+}
+
+async function savePayment(){
+
+  await insert("payments",{
+    amount:Number(f1.value||0),
+    customer_id:f2.value||null,
+    method:f3.value.trim(),
+    status:f4.value,
+    payment_date:new Date().toISOString().slice(0,10)
+  });
+}
+
+async function saveInvoice(){
+
+  await insert("invoices",{
+    invoice_number:f1.value.trim(),
+    customer_id:f2.value||null,
+    amount:Number(f3.value||0),
+    due_date:f4.value||null,
+    status:"draft",
+    notes:f5.value.trim()
+  });
+}
+
+async function saveFollowup(){
+
+  await insert("followups",{
+    customer_id:f2.value||null,
+    note:f1.value.trim(),
+    followup_date:f3.value||null,
+    done:false
+  });
+}
+
+async function saveTask(){
+
+  await insert("tasks",{
+    title:f1.value.trim(),
+    due_date:f2.value||null,
+    priority:f3.value,
+    status:"To Do"
+  });
+}
+
+async function saveTeam(){
+
+  const r=await sb.from("business_members").insert({
+    business_id:business.id,
+    user_id:f1.value.trim(),
+    role:f2.value
+  });
+
+  if(r.error){
+    alert(r.error.message);
+    return;
+  }
+
+  closeModal();
+  await renderAll();
+}
+
+async function updateOrder(id,status){
+
+  const r=await sb.from("orders")
+    .update({status})
+    .eq("id",id)
+    .eq("business_id",business.id);
+
+  if(r.error){
+    alert(r.error.message);
+  }else{
+    await renderAll();
+  }
+}
+
+async function updateOrderPayment(id,status){
+
+  const r=await sb.from("orders")
+    .update({
+      payment_status:status
+    })
+    .eq("id",id)
+    .eq("business_id",business.id);
+
+  if(r.error){
+    alert(r.error.message);
+  }else{
+    await renderAll();
+  }
+}
+
+async function completeFollowup(id){
+
+  const r=await sb.from("followups")
+    .update({done:true})
+    .eq("id",id)
+    .eq("business_id",business.id);
+
+  if(r.error){
+    alert(r.error.message);
+  }else{
+    await renderAll();
+  }
+}
+
+async function completeTask(id){
+
+  const r=await sb.from("tasks")
+    .update({status:"Done"})
+    .eq("id",id)
+    .eq("business_id",business.id);
+
+  if(r.error){
+    alert(r.error.message);
+  }else{
+    await renderAll();
+  }
+}
+
+async function markInvoicePaid(id){
+
+  const r=await sb.from("invoices")
+    .update({
+      status:"paid",
+      paid_at:new Date().toISOString()
+    })
+    .eq("id",id)
+    .eq("business_id",business.id);
+
+  if(r.error){
+    alert(r.error.message);
+  }else{
+    await renderAll();
+  }
+}
+
+async function startVoice(){
+
+  if(!navigator.mediaDevices?.getUserMedia){
+
+    alert("Voice recording is not supported in this browser.");
+    return;
+  }
+
+  if(mediaRecorder?.state==="recording"){
+
+    mediaRecorder.stop();
+
+    document.getElementById("voiceBtn").textContent="Voice note";
+
+    return;
+  }
+
+  try{
+
+    const stream=
+      await navigator.mediaDevices.getUserMedia({
+        audio:true
+      });
+
+    audioChunks=[];
+
+    mediaRecorder=new MediaRecorder(stream);
+
+    mediaRecorder.ondataavailable=e=>{
+      audioChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop=async()=>{
+
+      stream.getTracks().forEach(t=>t.stop());
+
+      const blob=new Blob(audioChunks,{
+        type:"audio/webm"
+      });
+
+      const path=
+        business.id+"/"+Date.now()+".webm";
+
+      const r=
+        await sb.storage
+          .from("voice-notes")
+          .upload(path,blob,{
+            contentType:"audio/webm"
+          });
+
+      if(r.error){
+
+        alert(
+          "Voice note could not be uploaded: "+
+          r.error.message
+        );
+
+      }else{
+
+        alert("Voice note uploaded successfully.");
+      }
+    };
+
+    mediaRecorder.start();
+
+    document.getElementById("voiceBtn").textContent=
+      "Stop recording";
+
+  }catch(e){
+
+    alert("Microphone access was not available.");
+  }
+}
+
+sb.auth.getSession().then(async({data})=>{
+
+  if(data.session){
+    await boot();
+  }
+
+});
+
+sb.auth.onAuthStateChange(async(event,session)=>{
+
+  if(event==="PASSWORD_RECOVERY"){
+
+    authMessage(
+      "Password recovery is ready. Enter your new password in the recovery flow.",
+      "success"
+    );
+  }
+
+  if(event==="SIGNED_OUT"){
+    location.reload();
+  }
+
+});
 </script>
+
 </body>
 </html>

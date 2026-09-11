@@ -2106,9 +2106,44 @@ ${esc(payment)}
 
 <button
 class="btn small"
+onclick="editOrder('${x.id}')"
+>
+Edit
+</button>
+
+<button
+class="btn small danger"
+onclick="deleteOrder('${x.id}')"
+>
+Delete
+</button>
+
+<button
+class="btn small"
+onclick="updateOrder('${x.id}','Processing')"
+>
+Processing
+</button>
+
+<button
+class="btn small"
+onclick="updateOrder('${x.id}','Ready')"
+>
+Ready
+</button>
+
+<button
+class="btn small"
 onclick="updateOrder('${x.id}','Delivered')"
 >
 Delivered
+</button>
+
+<button
+class="btn small"
+onclick="updateOrder('${x.id}','Cancelled')"
+>
+Cancelled
 </button>
 
 <button
@@ -2197,6 +2232,7 @@ data.length
 <th>Method</th>
 <th>Status</th>
 <th>Date</th>
+<th>Actions</th>
 </tr>
 
 ${data.map(x=>`
@@ -2215,6 +2251,13 @@ ${esc(x.status||"")}
 
 <td>
 ${esc(x.payment_date||"")}
+</td>
+
+<td>
+<div class="row-actions">
+<button class="btn small" onclick="editPayment('${x.id}')">Edit</button>
+<button class="btn small danger" onclick="deletePayment('${x.id}')">Delete</button>
+</div>
 </td>
 
 </tr>
@@ -2323,6 +2366,21 @@ ${overdue
 
 <td>
 
+<div class="row-actions">
+<button
+class="btn small"
+onclick="editInvoice('${x.id}')"
+>
+Edit
+</button>
+
+<button
+class="btn small danger"
+onclick="deleteInvoice('${x.id}')"
+>
+Delete
+</button>
+
 ${
 String(x.status||"").toLowerCase()==="paid"
 ?""
@@ -2336,6 +2394,7 @@ Mark paid
 </button>
 `
 }
+</div>
 
 </td>
 
@@ -2430,6 +2489,21 @@ ${x.done?"Done":"Pending"}
 
 <td>
 
+<div class="row-actions">
+<button
+class="btn small"
+onclick="editFollowup('${x.id}')"
+>
+Edit
+</button>
+
+<button
+class="btn small danger"
+onclick="deleteFollowup('${x.id}')"
+>
+Delete
+</button>
+
 ${
 x.done
 ?""
@@ -2443,6 +2517,7 @@ Mark done
 </button>
 `
 }
+</div>
 
 </td>
 
@@ -2540,6 +2615,21 @@ ${esc(x.status)}
 
 <td>
 
+<div class="row-actions">
+<button
+class="btn small"
+onclick="editTask('${x.id}')"
+>
+Edit
+</button>
+
+<button
+class="btn small danger"
+onclick="deleteTask('${x.id}')"
+>
+Delete
+</button>
+
 ${
 x.status==="Done"
 ?""
@@ -2553,6 +2643,7 @@ Mark Done
 </button>
 `
 }
+</div>
 
 </td>
 
@@ -3379,7 +3470,7 @@ business_id:business.id
 
 if(result.error){
 
-alert(result.error.message);
+toast(result.error.message,'error');
 return false;
 
 }
@@ -3518,7 +3609,7 @@ role:f2.value
 
 if(result.error){
 
-alert(result.error.message);
+toast(result.error.message,'error');
 return;
 
 }
@@ -3542,7 +3633,7 @@ status:status
 
 if(result.error){
 
-alert(result.error.message);
+toast(result.error.message,'error');
 
 }else{
 
@@ -3567,7 +3658,7 @@ payment_status:status
 
 if(result.error){
 
-alert(result.error.message);
+toast(result.error.message,'error');
 
 }else{
 
@@ -3675,7 +3766,7 @@ async function deleteCustomer(id){
  showScreen('customers');
  toast('Customer deleted successfully','success');
 }
-async function editOrder(id){const d=(await rows('orders')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Order',`<div class="formrow"><label>Item</label><input id="e1" class="input" value="${esc(d.item)}"></div><div class="formrow"><label>Amount</label><input id="e2" class="input" type="number" value="${Number(d.amount||0)}"></div><div class="formrow"><label>Order Status</label><select id="e3" class="input"><option>Processing</option><option>Confirmed</option><option>Delivered</option><option>Cancelled</option></select></div><div class="formrow"><label>Payment Status</label><select id="e4" class="input"><option>UNPAID</option><option>PARTIALLY PAID</option><option>PAID</option></select></div><button class="btn gold" onclick="dbUpdate('orders','${id}',{item:e1.value.trim(),amount:Number(e2.value||0),status:e3.value,payment_status:e4.value})">Save Changes</button>`);e3.value=d.status||'Processing';e4.value=d.payment_status||'UNPAID'}
+async function editOrder(id){const d=(await rows('orders')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Order',`<div class="formrow"><label>Item</label><input id="e1" class="input" value="${esc(d.item)}"></div><div class="formrow"><label>Amount</label><input id="e2" class="input" type="number" value="${Number(d.amount||0)}"></div><div class="formrow"><label>Order Status</label><select id="e3" class="input"><option>Pending</option><option>Processing</option><option>Ready</option><option>Delivered</option><option>Cancelled</option></select></div><div class="formrow"><label>Payment Status</label><select id="e4" class="input"><option>UNPAID</option><option>PARTIALLY PAID</option><option>PAID</option></select></div><button class="btn gold" onclick="dbUpdate('orders','${id}',{item:e1.value.trim(),amount:Number(e2.value||0),status:e3.value,payment_status:e4.value})">Save Changes</button>`);e3.value=d.status||'Pending';e4.value=d.payment_status||'UNPAID'}
 async function deleteOrder(id){await dbDelete('orders',id,'order')}
 async function editPayment(id){const d=(await rows('payments')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Payment',`<div class="formrow"><label>Amount</label><input id="e1" class="input" type="number" value="${Number(d.amount||0)}"></div><div class="formrow"><label>Method</label><select id="e2" class="input"><option>Cash</option><option>Bank Transfer</option><option>POS</option><option>Card</option><option>Other</option></select></div><div class="formrow"><label>Status</label><select id="e3" class="input"><option>Paid</option><option>Pending</option><option>Failed</option></select></div><button class="btn gold" onclick="dbUpdate('payments','${id}',{amount:Number(e1.value||0),method:e2.value,status:e3.value})">Save Changes</button>`);e2.value=d.method||'Cash';e3.value=d.status||'Paid'}
 async function deletePayment(id){await dbDelete('payments',id,'payment')}

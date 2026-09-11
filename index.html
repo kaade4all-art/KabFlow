@@ -3655,7 +3655,26 @@ async function dbUpdate(table,id,data){ const r=await sb.from(table).update(data
 async function dbDelete(table,id,label){ if(!confirm('Delete this '+label+'? This cannot be undone.')) return; const r=await sb.from(table).delete().eq('id',id).eq('business_id',business.id); if(r.error){toast(r.error.message,'error');return;} await renderAll(); }
 function toast(text,type='success'){ const m=document.getElementById('modalBody'); if(m){m.insertAdjacentHTML('afterbegin',`<div class="message ${type}">${esc(text)}</div>`); setTimeout(()=>{const x=m.querySelector('.message');if(x)x.remove()},3000); } }
 async function editCustomer(id){const d=(await rows('customers')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Customer',`<div class="formrow"><label>Name</label><input id="e1" class="input" value="${esc(d.name)}"></div><div class="formrow"><label>WhatsApp</label><input id="e2" class="input" value="${esc(d.phone||'')}"></div><div class="formrow"><label>Value</label><input id="e3" class="input" type="number" value="${Number(d.value||0)}"></div><div class="formrow"><label>Status</label><select id="e4" class="input"><option ${d.status==='Potential'?'selected':''}>Potential</option><option ${d.status==='Customer'?'selected':''}>Customer</option><option ${d.status==='Inactive'?'selected':''}>Inactive</option></select></div><button class="btn gold" onclick="dbUpdate('customers','${id}',{name:e1.value.trim(),phone:e2.value.trim(),value:Number(e3.value||0),status:e4.value})">Save Changes</button>`)}
-async function deleteCustomer(id){await dbDelete('customers',id,'customer')}
+async function deleteCustomer(id){
+ if(!confirm('Delete this customer and all related orders, payments, invoices and follow ups? This cannot be undone.')) return;
+ const customerId=id;
+ const businessId=business.id;
+ const steps=[
+  ['invoices','customer_id'],
+  ['payments','customer_id'],
+  ['followups','customer_id'],
+  ['orders','customer_id']
+ ];
+ for(const [table,column] of steps){
+  const r=await sb.from(table).delete().eq(column,customerId).eq('business_id',businessId);
+  if(r.error){toast('Customer could not be deleted: '+r.error.message,'error');return;}
+ }
+ const r=await sb.from('customers').delete().eq('id',customerId).eq('business_id',businessId);
+ if(r.error){toast('Customer could not be deleted: '+r.error.message,'error');return;}
+ await renderAll();
+ showScreen('customers');
+ toast('Customer deleted successfully','success');
+}
 async function editOrder(id){const d=(await rows('orders')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Order',`<div class="formrow"><label>Item</label><input id="e1" class="input" value="${esc(d.item)}"></div><div class="formrow"><label>Amount</label><input id="e2" class="input" type="number" value="${Number(d.amount||0)}"></div><div class="formrow"><label>Order Status</label><select id="e3" class="input"><option>Processing</option><option>Confirmed</option><option>Delivered</option><option>Cancelled</option></select></div><div class="formrow"><label>Payment Status</label><select id="e4" class="input"><option>UNPAID</option><option>PARTIALLY PAID</option><option>PAID</option></select></div><button class="btn gold" onclick="dbUpdate('orders','${id}',{item:e1.value.trim(),amount:Number(e2.value||0),status:e3.value,payment_status:e4.value})">Save Changes</button>`);e3.value=d.status||'Processing';e4.value=d.payment_status||'UNPAID'}
 async function deleteOrder(id){await dbDelete('orders',id,'order')}
 async function editPayment(id){const d=(await rows('payments')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Payment',`<div class="formrow"><label>Amount</label><input id="e1" class="input" type="number" value="${Number(d.amount||0)}"></div><div class="formrow"><label>Method</label><select id="e2" class="input"><option>Cash</option><option>Bank Transfer</option><option>POS</option><option>Card</option><option>Other</option></select></div><div class="formrow"><label>Status</label><select id="e3" class="input"><option>Paid</option><option>Pending</option><option>Failed</option></select></div><button class="btn gold" onclick="dbUpdate('payments','${id}',{amount:Number(e1.value||0),method:e2.value,status:e3.value})">Save Changes</button>`);e2.value=d.method||'Cash';e3.value=d.status||'Paid'}

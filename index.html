@@ -1920,11 +1920,15 @@ String(x.status||"").toLowerCase()==="paid"
 0
 );
 
-const outstanding=
-orders.reduce((total,order)=>{
- const paid=payments.filter(p=>p.order_id===order.id && String(p.status||"").toLowerCase()==="paid").reduce((a,p)=>a+Number(p.amount||0),0);
- return total+Math.max(Number(order.amount||0)-paid,0);
-},0);
+const totalOrderValue=
+orders.reduce((total,order)=>total+Number(order.amount||0),0);
+
+const totalPaid=
+payments
+.filter(x=>String(x.status||"").toLowerCase()==="paid")
+.reduce((total,x)=>total+Number(x.amount||0),0);
+
+const outstanding=Math.max(totalOrderValue-totalPaid,0);
 
 document.getElementById("dashboard").innerHTML=`
 
@@ -3615,6 +3619,22 @@ const profile=Array.isArray(lookup.data)?lookup.data[0]:lookup.data;
 
 if(!profile || !profile.id){
  toast("No KabFlow user was found with that email address.",'error');
+ return;
+}
+
+const existing=await sb.from("business_members")
+ .select("id,role")
+ .eq("business_id",business.id)
+ .eq("user_id",profile.id)
+ .maybeSingle();
+
+if(existing.error){
+ toast(existing.error.message,'error');
+ return;
+}
+
+if(existing.data){
+ toast("This email is already a team member of this business.",'error');
  return;
 }
 

@@ -2768,7 +2768,7 @@ onclick="openForm('team')"
 
 <p class="muted">
 
-Add an existing KabFlow user's Supabase user ID.
+Add an existing KabFlow user using their email address.
 
 </p>
 
@@ -3403,10 +3403,10 @@ title="Add Team Member";
 body=
 
 field(
-"Supabase User ID",
+"Email address",
 "f1",
-"text",
-"UUID of the user"
+"email",
+"team member email"
 )
 
 +
@@ -3597,26 +3597,41 @@ status:"To Do"
 
 async function saveTeam(){
 
-const result=
-await sb.from("business_members")
-.insert({
+const email=f1.value.trim().toLowerCase();
 
-business_id:business.id,
-user_id:f1.value.trim(),
-role:f2.value
+if(!email){
+ toast("Please enter the team member email address.",'error');
+ return;
+}
 
+const lookup=await sb.rpc("find_profile_by_email",{lookup_email:email});
+
+if(lookup.error){
+ toast(lookup.error.message,'error');
+ return;
+}
+
+const profile=Array.isArray(lookup.data)?lookup.data[0]:lookup.data;
+
+if(!profile || !profile.id){
+ toast("No KabFlow user was found with that email address.",'error');
+ return;
+}
+
+const result=await sb.from("business_members").insert({
+ business_id:business.id,
+ user_id:profile.id,
+ role:f2.value
 });
 
 if(result.error){
-
-toast(result.error.message,'error');
-return;
-
+ toast(result.error.message,'error');
+ return;
 }
 
 closeModal();
-
 await renderAll();
+toast("Team member added successfully",'success');
 
 }
 

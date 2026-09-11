@@ -3377,7 +3377,7 @@ class="input"
 >
 
 <option>Low</option>
-<option selected>Medium</option>
+<option selected>Normal</option>
 <option>High</option>
 
 </select>
@@ -3528,7 +3528,7 @@ await insert(
 
 amount:Number(f1.value||0),
 customer_id:f2.value||null,
-order_id:f5?.value||null,
+order_id:null,
 method:f3.value.trim(),
 status:f4.value,
 payment_date:
@@ -3774,7 +3774,7 @@ async function editInvoice(id){const d=(await rows('invoices')).find(x=>x.id===i
 async function deleteInvoice(id){await dbDelete('invoices',id,'invoice')}
 async function editFollowup(id){const d=(await rows('followups')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Follow Up',`<div class="formrow"><label>Note</label><input id="e1" class="input" value="${esc(d.note||'')}"></div><div class="formrow"><label>Date</label><input id="e2" class="input" type="date" value="${esc(d.followup_date||'')}"></div><button class="btn gold" onclick="dbUpdate('followups','${id}',{note:e1.value.trim(),followup_date:e2.value||null})">Save Changes</button>`)}
 async function deleteFollowup(id){await dbDelete('followups',id,'follow up')}
-async function editTask(id){const d=(await rows('tasks')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Task',`<div class="formrow"><label>Task</label><input id="e1" class="input" value="${esc(d.title||'')}"></div><div class="formrow"><label>Due Date</label><input id="e2" class="input" type="date" value="${esc(d.due_date||'')}"></div><div class="formrow"><label>Priority</label><select id="e3" class="input"><option>Low</option><option>Medium</option><option>High</option></select></div><button class="btn gold" onclick="dbUpdate('tasks','${id}',{title:e1.value.trim(),due_date:e2.value||null,priority:e3.value})">Save Changes</button>`);e3.value=d.priority||'Medium'}
+async function editTask(id){const d=(await rows('tasks')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Task',`<div class="formrow"><label>Task</label><input id="e1" class="input" value="${esc(d.title||'')}"></div><div class="formrow"><label>Due Date</label><input id="e2" class="input" type="date" value="${esc(d.due_date||'')}"></div><div class="formrow"><label>Priority</label><select id="e3" class="input"><option>Low</option><option>Normal</option><option>High</option></select></div><button class="btn gold" onclick="dbUpdate('tasks','${id}',{title:e1.value.trim(),due_date:e2.value||null,priority:e3.value})">Save Changes</button>`);e3.value=d.priority||'Normal'}
 async function deleteTask(id){await dbDelete('tasks',id,'task')}
 function openModalHtml(title,body){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=body;document.getElementById('modal').classList.add('show')}
 async function startVoice(){

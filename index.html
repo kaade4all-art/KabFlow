@@ -304,6 +304,13 @@ button{
   color:var(--danger);
 }
 
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.customer-link{color:var(--blue);font-weight:700;text-decoration:underline;cursor:pointer}
+.detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.detail-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px}
+@media(max-width:900px){.detail-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.detail-grid{grid-template-columns:1fr 1fr}}
+
 /* APP */
 
 .appbar{
@@ -1402,10 +1409,10 @@ return;
 
 }
 
-if(password.length<6){
+if(password.length<8){
 
 authMessage(
-"Password must be at least 6 characters.",
+"Password must be at least 8 characters.",
 "error"
 );
 
@@ -1908,14 +1915,10 @@ String(x.status||"").toLowerCase()==="paid"
 );
 
 const outstanding=
-invoices
-.filter(x=>
-String(x.status||"").toLowerCase()!=="paid"
-)
-.reduce(
-(total,x)=>total+Number(x.amount||0),
-0
-);
+orders.reduce((total,order)=>{
+ const paid=payments.filter(p=>p.order_id===order.id && String(p.status||"").toLowerCase()==="paid").reduce((a,p)=>a+Number(p.amount||0),0);
+ return total+Math.max(Number(order.amount||0)-paid,0);
+},0);
 
 document.getElementById("dashboard").innerHTML=`
 
@@ -1975,6 +1978,8 @@ Create Invoice
 
 </div>
 
+<div class="panel section"><div class="sectionhead"><h2>Recent Customers</h2></div>${customers.length?`<div class="tablewrap"><table class="table"><tr><th>Name</th><th>Phone</th><th>Value</th><th>Action</th></tr>${customers.slice(0,8).map(x=>`<tr><td><span class="customer-link" onclick="openCustomerDetails('${x.id}')">${esc(x.name)}</span></td><td>${esc(x.phone||"")}</td><td>${money(x.value)}</td><td><button class="btn small" onclick="openCustomerDetails('${x.id}')">View details</button></td></tr>`).join("")}</table></div>`:`<div class="empty">No customers yet.</div>`}</div>
+
 <p class="muted">
 Manage your customers, orders, payments, invoices and follow ups from one place.
 </p>
@@ -1986,91 +1991,28 @@ Manage your customers, orders, payments, invoices and follow ups from one place.
 
 
 async function renderCustomers(){
-
-const data=
-await rows("customers");
-
-document.getElementById("customers").innerHTML=`
-
-<div class="sectionhead">
-
-<h2>Customers</h2>
-
-<button
-class="btn gold"
-onclick="openForm('customer')"
->
-+ Add Customer
-</button>
-
-</div>
-
-${
-data.length
-?
-
-`
-<div class="tablewrap">
-
-<table class="table">
-
-<tr>
-<th>Name</th>
-<th>Phone</th>
-<th>Value</th>
-<th>Status</th>
-<th>WhatsApp</th>
-</tr>
-
-${data.map(x=>`
-
-<tr>
-
-<td>${esc(x.name)}</td>
-
-<td>${esc(x.phone)}</td>
-
-<td>${money(x.value)}</td>
-
-<td>
-<span class="badge">
-${esc(x.status||"")}
-</span>
-</td>
-
-<td>
-
-<button
-class="btn small"
-onclick="wa('${encodeURIComponent(x.phone||"")}','${encodeURIComponent(x.name||"")}')"
->
-WhatsApp
-</button>
-
-</td>
-
-</tr>
-
-`).join("")}
-
-</table>
-
-</div>
-`
-
-:
-
-`
-<div class="panel empty">
-No customers yet.
-</div>
-`
-
+ const data=await rows("customers");
+ document.getElementById("customers").innerHTML=`
+ <div class="sectionhead"><h2>Customers</h2><button class="btn gold" onclick="openForm('customer')">+ Add Customer</button></div>
+ ${data.length?`<div class="tablewrap"><table class="table"><tr><th>Name</th><th>Phone</th><th>Value</th><th>Status</th><th>Actions</th></tr>
+ ${data.map(x=>`<tr><td><span class="customer-link" onclick="openCustomerDetails('${x.id}')">${esc(x.name)}</span></td><td>${esc(x.phone)}</td><td>${money(x.value)}</td><td><span class="badge">${esc(x.status||"")}</span></td><td><div class="row-actions"><button class="btn small" onclick="openCustomerDetails('${x.id}')">View</button><button class="btn small" onclick="editCustomer('${x.id}')">Edit</button><button class="btn small danger" onclick="deleteCustomer('${x.id}')">Delete</button><button class="btn small" onclick="wa('${encodeURIComponent(x.phone||"")}','${encodeURIComponent(x.name||"")}')">WhatsApp</button></div></td></tr>`).join("")}
+ </table></div>`:`<div class="panel empty">No customers yet.</div>`}`;
 }
 
-`;
-
-
+async function openCustomerDetails(id){
+ const customers=await rows("customers"); const c=customers.find(x=>x.id===id); if(!c)return;
+ const [orders,payments,invoices,followups,tasks]=await Promise.all([rows("orders"),rows("payments"),rows("invoices"),rows("followups"),rows("tasks")]);
+ const co=orders.filter(x=>x.customer_id===id), cp=payments.filter(x=>x.customer_id===id), ci=invoices.filter(x=>x.customer_id===id), cf=followups.filter(x=>x.customer_id===id), ct=tasks.filter(x=>x.customer_id===id);
+ const paid=cp.filter(x=>String(x.status||'').toLowerCase()==='paid').reduce((a,x)=>a+Number(x.amount||0),0);
+ const outstanding=co.reduce((a,o)=>a+Math.max(Number(o.amount||0)-cp.filter(p=>p.order_id===o.id&&String(p.status||'').toLowerCase()==='paid').reduce((z,p)=>z+Number(p.amount||0),0),0),0);
+ document.getElementById('customerDetails').innerHTML=`<div class="sectionhead"><div><h2>${esc(c.name)}</h2><div class="muted">${esc(c.phone||'No phone number')} · ${esc(c.status||'')}</div></div><div class="row-actions"><button class="btn" onclick="showScreen('customers')">Back</button><button class="btn gold" onclick="openForm('order','${id}')">New Order</button><button class="btn" onclick="openForm('payment','${id}')">Record Payment</button><button class="btn" onclick="openForm('invoice','${id}')">Create Invoice</button><button class="btn" onclick="wa('${encodeURIComponent(c.phone||"")}','${encodeURIComponent(c.name||"")}')">WhatsApp</button></div></div>
+ <div class="detail-grid"><div class="detail-card"><div class="muted">Orders</div><div class="stat">${co.length}</div></div><div class="detail-card"><div class="muted">Order Value</div><div class="stat">${money(co.reduce((a,x)=>a+Number(x.amount||0),0))}</div></div><div class="detail-card"><div class="muted">Paid</div><div class="stat">${money(paid)}</div></div><div class="detail-card"><div class="muted">Outstanding</div><div class="stat">${money(outstanding)}</div></div></div>
+ <div class="panel section"><div class="sectionhead"><h2>Order History</h2></div>${co.length?`<div class="tablewrap"><table class="table"><tr><th>Item</th><th>Amount</th><th>Order Status</th><th>Payment Status</th><th>Actions</th></tr>${co.map(o=>`<tr><td>${esc(o.item)}</td><td>${money(o.amount)}</td><td>${esc(o.status||'')}</td><td>${esc(o.payment_status||'UNPAID')}</td><td><button class="btn small" onclick="editOrder('${o.id}')">Edit</button><button class="btn small danger" onclick="deleteOrder('${o.id}')">Delete</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No orders.</div>'}</div>
+ <div class="panel section"><h2>Payments</h2>${cp.length?`<div class="tablewrap"><table class="table"><tr><th>Amount</th><th>Method</th><th>Status</th><th>Date</th><th>Action</th></tr>${cp.map(x=>`<tr><td>${money(x.amount)}</td><td>${esc(x.method)}</td><td>${esc(x.status)}</td><td>${esc(x.payment_date||'')}</td><td><button class="btn small" onclick="editPayment('${x.id}')">Edit</button><button class="btn small danger" onclick="deletePayment('${x.id}')">Delete</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No payments.</div>'}</div>
+ <div class="panel section"><h2>Invoices</h2>${ci.length?`<div class="tablewrap"><table class="table"><tr><th>Invoice</th><th>Amount</th><th>Due</th><th>Status</th><th>Action</th></tr>${ci.map(x=>`<tr><td>${esc(x.invoice_number)}</td><td>${money(x.amount)}</td><td>${esc(x.due_date||'')}</td><td>${esc(x.status||'draft')}</td><td><button class="btn small" onclick="editInvoice('${x.id}')">Edit</button><button class="btn small danger" onclick="deleteInvoice('${x.id}')">Delete</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No invoices.</div>'}</div>
+ <div class="panel section"><h2>Follow Ups</h2>${cf.length?`<div class="tablewrap"><table class="table"><tr><th>Note</th><th>Date</th><th>Status</th><th>Action</th></tr>${cf.map(x=>`<tr><td>${esc(x.note)}</td><td>${esc(x.followup_date||'')}</td><td>${x.done?'Done':'Pending'}</td><td><button class="btn small" onclick="editFollowup('${x.id}')">Edit</button><button class="btn small danger" onclick="deleteFollowup('${x.id}')">Delete</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No follow ups.</div>'}</div>
+ <div class="panel section"><h2>Tasks</h2>${ct.length?`<div class="tablewrap"><table class="table"><tr><th>Task</th><th>Due</th><th>Priority</th><th>Status</th><th>Action</th></tr>${ct.map(x=>`<tr><td>${esc(x.title)}</td><td>${esc(x.due_date||'')}</td><td>${esc(x.priority||'')}</td><td>${esc(x.status||'')}</td><td><button class="btn small" onclick="editTask('${x.id}')">Edit</button><button class="btn small danger" onclick="deleteTask('${x.id}')">Delete</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No tasks.</div>'}</div>`;
+ showScreen('customerDetails');
 }
 
 
@@ -2873,7 +2815,7 @@ placeholder="${placeholder}"
 }
 
 
-async function openForm(type){
+async function openForm(type,customerId=null){
 
 let title="";
 let body="";
@@ -3168,7 +3110,7 @@ field(
 "Invoice Number",
 "f1",
 "text",
-"INV-001"
+"Auto generated"
 )
 
 +
@@ -3489,6 +3431,7 @@ await insert(
 
 amount:Number(f1.value||0),
 customer_id:f2.value||null,
+order_id:f5?.value||null,
 method:f3.value.trim(),
 status:f4.value,
 payment_date:
@@ -3701,6 +3644,23 @@ await renderAll();
 }
 
 
+
+async function dbUpdate(table,id,data){ const r=await sb.from(table).update(data).eq('id',id).eq('business_id',business.id); if(r.error){toast(r.error.message,'error');return false;} await renderAll(); return true; }
+async function dbDelete(table,id,label){ if(!confirm('Delete this '+label+'? This cannot be undone.')) return; const r=await sb.from(table).delete().eq('id',id).eq('business_id',business.id); if(r.error){toast(r.error.message,'error');return;} await renderAll(); }
+function toast(text,type='success'){ const m=document.getElementById('modalBody'); if(m){m.insertAdjacentHTML('afterbegin',`<div class="message ${type}">${esc(text)}</div>`); setTimeout(()=>{const x=m.querySelector('.message');if(x)x.remove()},3000); } }
+async function editCustomer(id){const d=(await rows('customers')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Customer',`<div class="formrow"><label>Name</label><input id="e1" class="input" value="${esc(d.name)}"></div><div class="formrow"><label>WhatsApp</label><input id="e2" class="input" value="${esc(d.phone||'')}"></div><div class="formrow"><label>Value</label><input id="e3" class="input" type="number" value="${Number(d.value||0)}"></div><div class="formrow"><label>Status</label><select id="e4" class="input"><option ${d.status==='Potential'?'selected':''}>Potential</option><option ${d.status==='Customer'?'selected':''}>Customer</option><option ${d.status==='Inactive'?'selected':''}>Inactive</option></select></div><button class="btn gold" onclick="dbUpdate('customers','${id}',{name:e1.value.trim(),phone:e2.value.trim(),value:Number(e3.value||0),status:e4.value})">Save Changes</button>`)}
+async function deleteCustomer(id){await dbDelete('customers',id,'customer')}
+async function editOrder(id){const d=(await rows('orders')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Order',`<div class="formrow"><label>Item</label><input id="e1" class="input" value="${esc(d.item)}"></div><div class="formrow"><label>Amount</label><input id="e2" class="input" type="number" value="${Number(d.amount||0)}"></div><div class="formrow"><label>Order Status</label><select id="e3" class="input"><option>Processing</option><option>Confirmed</option><option>Delivered</option><option>Cancelled</option></select></div><div class="formrow"><label>Payment Status</label><select id="e4" class="input"><option>UNPAID</option><option>PARTIALLY PAID</option><option>PAID</option></select></div><button class="btn gold" onclick="dbUpdate('orders','${id}',{item:e1.value.trim(),amount:Number(e2.value||0),status:e3.value,payment_status:e4.value})">Save Changes</button>`);e3.value=d.status||'Processing';e4.value=d.payment_status||'UNPAID'}
+async function deleteOrder(id){await dbDelete('orders',id,'order')}
+async function editPayment(id){const d=(await rows('payments')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Payment',`<div class="formrow"><label>Amount</label><input id="e1" class="input" type="number" value="${Number(d.amount||0)}"></div><div class="formrow"><label>Method</label><select id="e2" class="input"><option>Cash</option><option>Bank Transfer</option><option>POS</option><option>Card</option><option>Other</option></select></div><div class="formrow"><label>Status</label><select id="e3" class="input"><option>Paid</option><option>Pending</option><option>Failed</option></select></div><button class="btn gold" onclick="dbUpdate('payments','${id}',{amount:Number(e1.value||0),method:e2.value,status:e3.value})">Save Changes</button>`);e2.value=d.method||'Cash';e3.value=d.status||'Paid'}
+async function deletePayment(id){await dbDelete('payments',id,'payment')}
+async function editInvoice(id){const d=(await rows('invoices')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Invoice',`<div class="formrow"><label>Invoice Number</label><input id="e1" class="input" value="${esc(d.invoice_number||'')}"></div><div class="formrow"><label>Amount</label><input id="e2" class="input" type="number" value="${Number(d.amount||0)}"></div><div class="formrow"><label>Due Date</label><input id="e3" class="input" type="date" value="${esc(d.due_date||'')}"></div><div class="formrow"><label>Status</label><select id="e4" class="input"><option>draft</option><option>paid</option></select></div><button class="btn gold" onclick="dbUpdate('invoices','${id}',{invoice_number:e1.value.trim(),amount:Number(e2.value||0),due_date:e3.value||null,status:e4.value,paid_at:e4.value==='paid'?new Date().toISOString():null})">Save Changes</button>`);e4.value=d.status||'draft'}
+async function deleteInvoice(id){await dbDelete('invoices',id,'invoice')}
+async function editFollowup(id){const d=(await rows('followups')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Follow Up',`<div class="formrow"><label>Note</label><input id="e1" class="input" value="${esc(d.note||'')}"></div><div class="formrow"><label>Date</label><input id="e2" class="input" type="date" value="${esc(d.followup_date||'')}"></div><button class="btn gold" onclick="dbUpdate('followups','${id}',{note:e1.value.trim(),followup_date:e2.value||null})">Save Changes</button>`)}
+async function deleteFollowup(id){await dbDelete('followups',id,'follow up')}
+async function editTask(id){const d=(await rows('tasks')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Task',`<div class="formrow"><label>Task</label><input id="e1" class="input" value="${esc(d.title||'')}"></div><div class="formrow"><label>Due Date</label><input id="e2" class="input" type="date" value="${esc(d.due_date||'')}"></div><div class="formrow"><label>Priority</label><select id="e3" class="input"><option>Low</option><option>Medium</option><option>High</option></select></div><button class="btn gold" onclick="dbUpdate('tasks','${id}',{title:e1.value.trim(),due_date:e2.value||null,priority:e3.value})">Save Changes</button>`);e3.value=d.priority||'Medium'}
+async function deleteTask(id){await dbDelete('tasks',id,'task')}
+function openModalHtml(title,body){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=body;document.getElementById('modal').classList.add('show')}
 async function startVoice(){
 
 if(!navigator.mediaDevices?.getUserMedia){
@@ -3831,7 +3791,6 @@ location.reload();
 );
 
 </script>
-</html>
 
 </body>
 </html>

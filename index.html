@@ -2013,8 +2013,14 @@ async function openCustomerDetails(id){
  const customers=await rows("customers"); const c=customers.find(x=>x.id===id); if(!c)return;
  const [orders,payments,invoices,followups,tasks]=await Promise.all([rows("orders"),rows("payments"),rows("invoices"),rows("followups"),rows("tasks")]);
  const co=orders.filter(x=>x.customer_id===id), cp=payments.filter(x=>x.customer_id===id), ci=invoices.filter(x=>x.customer_id===id), cf=followups.filter(x=>x.customer_id===id), ct=tasks.filter(x=>x.customer_id===id);
- const paid=cp.filter(x=>String(x.status||'').toLowerCase()==='paid').reduce((a,x)=>a+Number(x.amount||0),0);
- const outstanding=co.reduce((a,o)=>a+Math.max(Number(o.amount||0)-cp.filter(p=>p.order_id===o.id&&String(p.status||'').toLowerCase()==='paid').reduce((z,p)=>z+Number(p.amount||0),0),0),0);
+ const paid=cp
+ .filter(x=>String(x.status||'').toLowerCase()==='paid')
+ .reduce((a,x)=>a+Number(x.amount||0),0);
+
+ const totalOrderValue=co
+ .reduce((a,o)=>a+Number(o.amount||0),0);
+
+ const outstanding=Math.max(totalOrderValue-paid,0);
  document.getElementById('customerDetails').innerHTML=`<div class="sectionhead"><div><h2>${esc(c.name)}</h2><div class="muted">${esc(c.phone||'No phone number')} · ${esc(c.status||'')}</div></div><div class="row-actions"><button class="btn" onclick="showScreen('customers')">Back</button><button class="btn gold" onclick="openForm('order','${id}')">New Order</button><button class="btn" onclick="openForm('payment','${id}')">Record Payment</button><button class="btn" onclick="openForm('invoice','${id}')">Create Invoice</button><button class="btn" onclick="wa('${encodeURIComponent(c.phone||"")}','${encodeURIComponent(c.name||"")}')">WhatsApp</button></div></div>
  <div class="detail-grid"><div class="detail-card"><div class="muted">Orders</div><div class="stat">${co.length}</div></div><div class="detail-card"><div class="muted">Order Value</div><div class="stat">${money(co.reduce((a,x)=>a+Number(x.amount||0),0))}</div></div><div class="detail-card"><div class="muted">Paid</div><div class="stat">${money(paid)}</div></div><div class="detail-card"><div class="muted">Outstanding</div><div class="stat">${money(outstanding)}</div></div></div>
  <div class="panel section"><div class="sectionhead"><h2>Order History</h2></div>${co.length?`<div class="tablewrap"><table class="table"><tr><th>Item</th><th>Amount</th><th>Order Status</th><th>Payment Status</th><th>Actions</th></tr>${co.map(o=>`<tr><td>${esc(o.item)}</td><td>${money(o.amount)}</td><td>${esc(o.status||'')}</td><td>${esc(o.payment_status||'UNPAID')}</td><td><button class="btn small" onclick="editOrder('${o.id}')">Edit</button><button class="btn small danger" onclick="deleteOrder('${o.id}')">Delete</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No orders.</div>'}</div>

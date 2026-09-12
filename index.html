@@ -3945,7 +3945,7 @@ async function viewInvoice(id){
  const c=customers.find(x=>x.id===inv.customer_id)||{};
  const financial=await getInvoiceFinancials(inv);
 
- const businessName=business?.name||"KabFlow Business";
+ const businessName=business?.name||"Your Business Name";
  const address=business?.address||"";
  const phone=business?.phone||"";
  const email=business?.owner_email||currentUser?.email||"";
@@ -3970,7 +3970,12 @@ async function viewInvoice(id){
  <button class="print" onclick="window.print()">Print / Save as PDF</button>
  <div class="invoice">
   <div class="head">
-   <div><div class="brand">Kab<span>Flow</span></div><strong>${esc(businessName)}</strong><div class="muted">${esc(address)}</div><div class="muted">${esc(phone)} ${email?" | "+esc(email):""}</div></div>
+   <div>
+   <div class="brand">Kab<span>Flow</span></div>
+   <strong>${esc(businessName)}</strong>
+   <div class="muted">${esc(address)}</div>
+   <div class="muted">${esc(phone)}${email?" | "+esc(email):""}</div>
+  </div>
    <div class="right"><div class="title">INVOICE</div><div><strong>${esc(inv.invoice_number||"")}</strong></div><div class="muted">Issued: ${esc(new Date(inv.created_at||Date.now()).toLocaleDateString())}</div><div class="muted">Due: ${esc(inv.due_date||"Not specified")}</div></div>
   </div>
 

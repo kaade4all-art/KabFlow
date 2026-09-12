@@ -305,7 +305,7 @@ button{
 }
 
 .btn:disabled{opacity:.55;cursor:not-allowed}
-.customer-link{color:var(--blue);font-weight:700;text-decoration:underline;cursor:pointer}
+.customer-link{color:var(--blue);font-weight:700;text-decoration:underline;cursor:pointer;background:none;border:0;padding:0;font:inherit;text-align:left;display:inline-block}.customer-link:hover{opacity:.75}
 .detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .detail-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px}
 @media(max-width:900px){.detail-grid{grid-template-columns:repeat(2,1fr)}}
@@ -2039,7 +2039,7 @@ Create Invoice
 
 </div>
 
-<div class="panel section"><div class="sectionhead"><h2>Recent Customers</h2></div>${customers.length?`<div class="tablewrap"><table class="table"><tr><th>Name</th><th>Phone</th><th>Value</th><th>Action</th></tr>${customers.slice(0,8).map(x=>`<tr><td><span class="customer-link" onclick="openCustomerDetails('${x.id}')">${esc(x.name)}</span></td><td>${esc(x.phone||"")}</td><td>${money(x.value)}</td><td><button class="btn small" onclick="openCustomerDetails('${x.id}')">View details</button></td></tr>`).join("")}</table></div>`:`<div class="empty">No customers yet.</div>`}</div>
+<div class="panel section"><div class="sectionhead"><h2>Recent Customers</h2></div>${customers.length?`<div class="tablewrap"><table class="table"><tr><th>Name</th><th>Phone</th><th>Value</th><th>Action</th></tr>${customers.slice(0,8).map(x=>`<tr><td><button type="button" class="customer-link" onclick="openCustomerDetails('${x.id}'); return false;">${esc(x.name)}</button></td><td>${esc(x.phone||"")}</td><td>${money(x.value)}</td><td><button class="btn small" onclick="openCustomerDetails('${x.id}')">View details</button></td></tr>`).join("")}</table></div>`:`<div class="empty">No customers yet.</div>`}</div>
 
 <p class="muted">
 Manage your customers, orders, payments, invoices and follow ups from one place.
@@ -2056,7 +2056,7 @@ async function renderCustomers(){
  document.getElementById("customers").innerHTML=`
  <div class="sectionhead"><h2>Customers</h2><button class="btn gold" onclick="openForm('customer')">+ Add Customer</button></div>
  ${data.length?`<div class="tablewrap"><table class="table"><tr><th>Name</th><th>Phone</th><th>Value</th><th>Status</th><th>Actions</th></tr>
- ${data.map(x=>`<tr><td><span class="customer-link" onclick="openCustomerDetails('${x.id}')">${esc(x.name)}</span></td><td>${esc(x.phone)}</td><td>${money(x.value)}</td><td><span class="badge">${esc(x.status||"")}</span></td><td><div class="row-actions"><button class="btn small" onclick="openCustomerDetails('${x.id}')">View</button><button class="btn small" onclick="editCustomer('${x.id}')">Edit</button><button class="btn small danger" onclick="deleteCustomer('${x.id}')">Delete</button><button class="btn small" onclick="wa('${encodeURIComponent(x.phone||"")}','${encodeURIComponent(x.name||"")}')">WhatsApp</button></div></td></tr>`).join("")}
+ ${data.map(x=>`<tr><td><button type="button" class="customer-link" onclick="openCustomerDetails('${x.id}'); return false;">${esc(x.name)}</button></td><td>${esc(x.phone)}</td><td>${money(x.value)}</td><td><span class="badge">${esc(x.status||"")}</span></td><td><div class="row-actions"><button class="btn small" onclick="openCustomerDetails('${x.id}')">View</button><button class="btn small" onclick="editCustomer('${x.id}')">Edit</button><button class="btn small danger" onclick="deleteCustomer('${x.id}')">Delete</button><button class="btn small" onclick="wa('${encodeURIComponent(x.phone||"")}','${encodeURIComponent(x.name||"")}')">WhatsApp</button></div></td></tr>`).join("")}
  </table></div>`:`<div class="panel empty">No customers yet.</div>`}`;
 }
 

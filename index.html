@@ -4074,21 +4074,46 @@ async function loadOverdueReminders(){
    const d=new Date(String(i.due_date)+"T00:00:00");
    return !Number.isNaN(d.getTime()) && d.getTime()===today.getTime();
  });
- const total=a=>a.reduce((s,i)=>s+Number(i.amount||0),0);
+ const payments=await rows("payments");
+ const paidByInvoice=new Map();
+ const paidByCustomer=new Map();
+ payments.forEach(p=>{
+   if(String(p.status||"").toLowerCase()!=="paid") return;
+   const amount=Number(p.amount||0);
+   if(p.invoice_id){
+     paidByInvoice.set(p.invoice_id,(paidByInvoice.get(p.invoice_id)||0)+amount);
+   }
+   if(p.customer_id){
+     paidByCustomer.set(p.customer_id,(paidByCustomer.get(p.customer_id)||0)+amount);
+   }
+ });
+ const balanceForInvoice=i=>{
+   const invoiceAmount=Number(i.amount||0);
+   let paid=paidByInvoice.get(i.id)||0;
+   // Older KabFlow payments may not have invoice_id. For a customer with a single
+   // open invoice, use that customer's paid total so the balance still reflects.
+   if(!paid && i.customer_id){
+     const customerOpen=invoices.filter(x=>x.customer_id===i.customer_id && String(x.status||"").toLowerCase()!=="paid");
+     if(customerOpen.length===1) paid=paidByCustomer.get(i.customer_id)||0;
+   }
+   return Math.max(invoiceAmount-paid,0);
+ };
+ const totalBalance=a=>a.reduce((s,i)=>s+balanceForInvoice(i),0);
  document.getElementById("reminderSummary").innerHTML=`
  <div class="detail-card"><div class="muted">Overdue Invoices</div><div class="stat">${overdue.length}</div></div>
- <div class="detail-card"><div class="muted">Overdue Amount</div><div class="stat">${money(total(overdue))}</div></div>
+ <div class="detail-card"><div class="muted">Overdue Amount</div><div class="stat">${money(totalBalance(overdue))}</div></div>
  <div class="detail-card"><div class="muted">Due Today</div><div class="stat">${dueToday.length}</div></div>
- <div class="detail-card"><div class="muted">Due Today Amount</div><div class="stat">${money(total(dueToday))}</div></div>`;
+ <div class="detail-card"><div class="muted">Due Today Amount</div><div class="stat">${money(totalBalance(dueToday))}</div></div>`;
  const all=[...overdue.map(i=>({...i,_kind:"Overdue"})),...dueToday.map(i=>({...i,_kind:"Due today"}))];
  const list=document.getElementById("reminderList");
  if(!all.length){list.innerHTML='<div class="empty">No due or overdue invoices.</div>';return;}
- list.innerHTML=`<div class="tablewrap"><table class="table"><tr><th>Invoice</th><th>Customer Name</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Action</th></tr>
+ list.innerHTML=`<div class="tablewrap"><table class="table"><tr><th>Invoice</th><th>Customer Name</th><th>Invoice Amount</th><th>Balance Due</th><th>Due Date</th><th>Status</th><th>Action</th></tr>
  ${all.map(i=>{
    const c=cmap.get(i.customer_id)||{};
    const phone=String(c.phone||"").replace(/\D/g,"");
-   const msg=encodeURIComponent(`Hello ${c.name||"there"}, this is a friendly reminder about invoice ${i.invoice_number||""} for ${money(i.amount)} due ${i.due_date||""}. Please let us know once payment has been made. Thank you.`);
-   return `<tr><td>${esc(i.invoice_number||"")}</td><td>${esc(c.name||"Unknown customer")}</td><td>${money(i.amount)}</td><td>${esc(i.due_date||"")}</td><td><span class="badge ${i._kind==="Overdue"?"danger":""}">${i._kind}</span></td><td><div class="row-actions"><button class="btn small" onclick="markInvoicePaid('${i.id}')">Mark Paid</button>${phone?`<a class="btn small" target="_blank" rel="noopener" href="https://wa.me/${phone}?text=${msg}">WhatsApp Reminder</a>`:""}</div></td></tr>`;
+   const balance=balanceForInvoice(i);
+   const msg=encodeURIComponent(`Hello ${c.name||"there"}, this is a friendly reminder about invoice ${i.invoice_number||""}. The outstanding balance is ${money(balance)} and the due date is ${i.due_date||""}. Please let us know once payment has been made. Thank you.`);
+   return `<tr><td>${esc(i.invoice_number||"")}</td><td>${esc(c.name||"Unknown customer")}</td><td>${money(i.amount)}</td><td><strong>${money(balance)}</strong></td><td>${esc(i.due_date||"")}</td><td><span class="badge ${i._kind==="Overdue"?"danger":""}">${i._kind}</span></td><td><div class="row-actions"><button class="btn small" onclick="markInvoicePaid('${i.id}')">Mark Paid</button>${phone?`<a class="btn small" target="_blank" rel="noopener" href="https://wa.me/${phone}?text=${msg}">WhatsApp Reminder</a>`:""}</div></td></tr>`;
  }).join("")}</table></div>`;
 }
 

@@ -4060,61 +4060,181 @@ location.reload();
 async function loadOverdueReminders(){
  const invoices=await rows("invoices");
  const customers=await rows("customers");
+ const orders=await rows("orders");
+ const payments=await rows("payments");
+
  const today=new Date();
  today.setHours(0,0,0,0);
+
  const cmap=new Map(customers.map(c=>[c.id,c]));
+ const omap=new Map(orders.map(o=>[o.id,o]));
+
  const unpaid=invoices.filter(i=>String(i.status||"").toLowerCase()!=="paid");
+
  const overdue=unpaid.filter(i=>{
    if(!i.due_date)return false;
    const d=new Date(String(i.due_date)+"T00:00:00");
    return !Number.isNaN(d.getTime()) && d<today;
  });
+
  const dueToday=unpaid.filter(i=>{
    if(!i.due_date)return false;
    const d=new Date(String(i.due_date)+"T00:00:00");
    return !Number.isNaN(d.getTime()) && d.getTime()===today.getTime();
  });
- const payments=await rows("payments");
+
  const paidByInvoice=new Map();
  const paidByCustomer=new Map();
+
  payments.forEach(p=>{
    if(String(p.status||"").toLowerCase()!=="paid") return;
+
    const amount=Number(p.amount||0);
+
    if(p.invoice_id){
-     paidByInvoice.set(p.invoice_id,(paidByInvoice.get(p.invoice_id)||0)+amount);
+     paidByInvoice.set(
+       p.invoice_id,
+       (paidByInvoice.get(p.invoice_id)||0)+amount
+     );
    }
+
    if(p.customer_id){
-     paidByCustomer.set(p.customer_id,(paidByCustomer.get(p.customer_id)||0)+amount);
+     paidByCustomer.set(
+       p.customer_id,
+       (paidByCustomer.get(p.customer_id)||0)+amount
+     );
    }
  });
- const balanceForInvoice=i=>{
-   const invoiceAmount=Number(i.amount||0);
-   let paid=paidByInvoice.get(i.id)||0;
-   // Older KabFlow payments may not have invoice_id. For a customer with a single
-   // open invoice, use that customer's paid total so the balance still reflects.
-   if(!paid && i.customer_id){
-     const customerOpen=invoices.filter(x=>x.customer_id===i.customer_id && String(x.status||"").toLowerCase()!=="paid");
-     if(customerOpen.length===1) paid=paidByCustomer.get(i.customer_id)||0;
+
+ /*
+  * Use the linked order amount as the real total whenever an invoice
+  * is connected to an order. This prevents a payment amount such as
+  * ₦40,000 from being mistaken for the customer's full ₦65,000 order.
+  */
+ const totalForInvoice=i=>{
+   const linkedOrder=i.order_id ? omap.get(i.order_id) : null;
+
+   if(linkedOrder && linkedOrder.amount!=null){
+     return Number(linkedOrder.amount||0);
    }
-   return Math.max(invoiceAmount-paid,0);
+
+   return Number(i.amount||0);
  };
- const totalBalance=a=>a.reduce((s,i)=>s+balanceForInvoice(i),0);
+
+ const balanceForInvoice=i=>{
+   const total=totalForInvoice(i);
+
+   let paid=paidByInvoice.get(i.id)||0;
+
+   /*
+    * Older KabFlow payments may not have invoice_id.
+    * If this customer has only one open invoice, use the customer's
+    * paid total for that invoice.
+    */
+   if(!paid && i.customer_id){
+     const customerOpen=invoices.filter(x=>
+       x.customer_id===i.customer_id &&
+       String(x.status||"").toLowerCase()!=="paid"
+     );
+
+     if(customerOpen.length===1){
+       paid=paidByCustomer.get(i.customer_id)||0;
+     }
+   }
+
+   return Math.max(total-paid,0);
+ };
+
+ const paidForInvoice=i=>{
+   const total=totalForInvoice(i);
+   return Math.max(total-balanceForInvoice(i),0);
+ };
+
+ const totalBalance=a=>
+   a.reduce((sum,i)=>sum+balanceForInvoice(i),0);
+
+ const totalAmount=a=>
+   a.reduce((sum,i)=>sum+totalForInvoice(i),0);
+
  document.getElementById("reminderSummary").innerHTML=`
- <div class="detail-card"><div class="muted">Overdue Invoices</div><div class="stat">${overdue.length}</div></div>
- <div class="detail-card"><div class="muted">Overdue Amount</div><div class="stat">${money(totalBalance(overdue))}</div></div>
- <div class="detail-card"><div class="muted">Due Today</div><div class="stat">${dueToday.length}</div></div>
- <div class="detail-card"><div class="muted">Due Today Amount</div><div class="stat">${money(totalBalance(dueToday))}</div></div>`;
- const all=[...overdue.map(i=>({...i,_kind:"Overdue"})),...dueToday.map(i=>({...i,_kind:"Due today"}))];
+ <div class="detail-card">
+   <div class="muted">Overdue Invoices</div>
+   <div class="stat">${overdue.length}</div>
+ </div>
+ <div class="detail-card">
+   <div class="muted">Overdue Balance</div>
+   <div class="stat">${money(totalBalance(overdue))}</div>
+ </div>
+ <div class="detail-card">
+   <div class="muted">Due Today</div>
+   <div class="stat">${dueToday.length}</div>
+ </div>
+ <div class="detail-card">
+   <div class="muted">Due Today Balance</div>
+   <div class="stat">${money(totalBalance(dueToday))}</div>
+ </div>`;
+
+ const all=[
+   ...overdue.map(i=>({...i,_kind:"Overdue"})),
+   ...dueToday.map(i=>({...i,_kind:"Due today"}))
+ ];
+
  const list=document.getElementById("reminderList");
- if(!all.length){list.innerHTML='<div class="empty">No due or overdue invoices.</div>';return;}
- list.innerHTML=`<div class="tablewrap"><table class="table"><tr><th>Invoice</th><th>Customer Name</th><th>Invoice Amount</th><th>Balance Due</th><th>Due Date</th><th>Status</th><th>Action</th></tr>
+
+ if(!all.length){
+   list.innerHTML='<div class="empty">No due or overdue invoices.</div>';
+   return;
+ }
+
+ list.innerHTML=`
+ <div class="tablewrap">
+ <table class="table">
+ <tr>
+   <th>Invoice</th>
+   <th>Customer Name</th>
+   <th>Total Amount</th>
+   <th>Paid</th>
+   <th>Balance Due</th>
+   <th>Due Date</th>
+   <th>Status</th>
+   <th>Action</th>
+ </tr>
+
  ${all.map(i=>{
    const c=cmap.get(i.customer_id)||{};
    const phone=String(c.phone||"").replace(/\D/g,"");
+   const total=totalForInvoice(i);
+   const paid=paidForInvoice(i);
    const balance=balanceForInvoice(i);
-   const msg=encodeURIComponent(`Hello ${c.name||"there"}, this is a friendly reminder about invoice ${i.invoice_number||""}. The outstanding balance is ${money(balance)} and the due date is ${i.due_date||""}. Please let us know once payment has been made. Thank you.`);
-   return `<tr><td>${esc(i.invoice_number||"")}</td><td>${esc(c.name||"Unknown customer")}</td><td>${money(i.amount)}</td><td><strong>${money(balance)}</strong></td><td>${esc(i.due_date||"")}</td><td><span class="badge ${i._kind==="Overdue"?"danger":""}">${i._kind}</span></td><td><div class="row-actions"><button class="btn small" onclick="markInvoicePaid('${i.id}')">Mark Paid</button>${phone?`<a class="btn small" target="_blank" rel="noopener" href="https://wa.me/${phone}?text=${msg}">WhatsApp Reminder</a>`:""}</div></td></tr>`;
- }).join("")}</table></div>`;
+
+   const msg=encodeURIComponent(
+     `Hello ${c.name||"there"}, this is a friendly reminder about invoice ${i.invoice_number||""}. The total amount is ${money(total)}, you have paid ${money(paid)}, and the outstanding balance is ${money(balance)}. The due date is ${i.due_date||""}. Please let us know once payment has been made. Thank you.`
+   );
+
+   return `
+   <tr>
+     <td>${esc(i.invoice_number||"")}</td>
+     <td>${esc(c.name||"Unknown customer")}</td>
+     <td><strong>${money(total)}</strong></td>
+     <td>${money(paid)}</td>
+     <td><strong>${money(balance)}</strong></td>
+     <td>${esc(i.due_date||"")}</td>
+     <td>
+       <span class="badge ${i._kind==="Overdue"?"danger":""}">
+         ${i._kind}
+       </span>
+     </td>
+     <td>
+       <div class="row-actions">
+         <button class="btn small" onclick="markInvoicePaid('${i.id}')">Mark Paid</button>
+         ${phone?`<a class="btn small" target="_blank" rel="noopener" href="https://wa.me/${phone}?text=${msg}">WhatsApp Reminder</a>`:""}
+       </div>
+     </td>
+   </tr>`;
+ }).join("")}
+
+ </table>
+ </div>`;
 }
 
 </script>

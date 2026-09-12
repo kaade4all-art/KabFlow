@@ -2347,141 +2347,59 @@ No payments yet.
 
 
 async function renderInvoices(){
+ const data=await rows("invoices");
+ const payments=await rows("payments");
+ const orders=await rows("orders");
+ const customers=await rows("customers");
+ const omap=new Map(orders.map(o=>[o.id,o]));
+ const cmap=new Map(customers.map(c=>[c.id,c]));
 
-const data=
-await rows("invoices");
+ const financial=i=>{
+   let order=i.order_id?omap.get(i.order_id):null;
+   if(!order && i.customer_id){
+     const co=orders.filter(o=>o.customer_id===i.customer_id);
+     if(co.length===1) order=co[0];
+   }
+   const total=order?Number(order.amount||0):Number(i.amount||0);
+   let paid=payments.filter(p=>p.invoice_id===i.id && String(p.status||"").toLowerCase()==="paid")
+     .reduce((a,p)=>a+Number(p.amount||0),0);
+   if(!paid && i.customer_id){
+     const open=data.filter(x=>x.customer_id===i.customer_id && String(x.status||"").toLowerCase()!=="paid");
+     if(open.length===1){
+       paid=payments.filter(p=>p.customer_id===i.customer_id && String(p.status||"").toLowerCase()==="paid")
+         .reduce((a,p)=>a+Number(p.amount||0),0);
+     }
+   }
+   return {total,paid,balance:Math.max(total-paid,0)};
+ };
 
-document.getElementById("invoices").innerHTML=`
-
-<div class="sectionhead">
-
-<h2>Invoices</h2>
-
-<button
-class="btn gold"
-onclick="openForm('invoice')"
->
-+ Create Invoice
-</button>
-
-</div>
-
-${
-data.length
-?
-
-`
-<div class="tablewrap">
-
-<table class="table">
-
-<tr>
-<th>Invoice</th>
-<th>Amount</th>
-<th>Due</th>
-<th>Status</th>
-<th>Action</th>
-</tr>
-
-${data.map(x=>{
-
-const overdue=
-x.due_date &&
-new Date(x.due_date)<new Date() &&
-String(x.status||"").toLowerCase()!=="paid";
-
-return `
-
-<tr>
-
-<td>
-${esc(x.invoice_number)}
-</td>
-
-<td>
-${money(x.amount)}
-</td>
-
-<td>
-${esc(x.due_date)}
-</td>
-
-<td>
-
-<span class="badge ${
-overdue
-?"danger"
-:
-String(x.status||"").toLowerCase()==="paid"
-?"success"
-:""
-}">
-
-${overdue
-?"OVERDUE"
-:esc(x.status||"draft")}
-
-</span>
-
-</td>
-
-<td>
-
-<div class="row-actions">
-<button class="btn small gold" onclick="viewInvoice('${x.id}')">View</button>
-<button class="btn small" onclick="shareInvoiceWhatsApp('${x.id}')">WhatsApp</button>
-<button class="btn small" onclick="editInvoice('${x.id}')">Edit</button>
-
-<button
-class="btn small danger"
-onclick="deleteInvoice('${x.id}')"
->
-Delete
-</button>
-
-${
-String(x.status||"").toLowerCase()==="paid"
-?""
-:
-`
-<button
-class="btn small"
-onclick="markInvoicePaid('${x.id}')"
->
-Mark paid
-</button>
-`
+ document.getElementById("invoices").innerHTML=`
+ <div class="sectionhead"><h2>Invoices</h2><button class="btn gold" onclick="openForm('invoice')">+ Create Invoice</button></div>
+ ${data.length?`<div class="tablewrap"><table class="table">
+ <tr><th>Invoice</th><th>Customer</th><th>Total Amount</th><th>Amount Paid</th><th>Balance Due</th><th>Due</th><th>Status</th><th>Action</th></tr>
+ ${data.map(x=>{
+   const f=financial(x);
+   const overdue=x.due_date && new Date(x.due_date)<new Date() && f.balance>0;
+   const status=f.balance<=0?"PAID":overdue?"OVERDUE":f.paid>0?"PARTIALLY PAID":"UNPAID";
+   const c=cmap.get(x.customer_id)||{};
+   return `<tr>
+   <td>${esc(x.invoice_number)}</td>
+   <td>${esc(c.name||"")}</td>
+   <td><strong>${money(f.total)}</strong></td>
+   <td>${money(f.paid)}</td>
+   <td><strong>${money(f.balance)}</strong></td>
+   <td>${esc(x.due_date||"")}</td>
+   <td><span class="badge ${status==="PAID"?"success":status==="OVERDUE"?"danger":""}">${status}</span></td>
+   <td><div class="row-actions">
+   <button class="btn small gold" onclick="viewInvoice('${x.id}')">View</button>
+   <button class="btn small" onclick="shareInvoiceWhatsApp('${x.id}')">WhatsApp</button>
+   <button class="btn small" onclick="editInvoice('${x.id}')">Edit</button>
+   <button class="btn small danger" onclick="deleteInvoice('${x.id}')">Delete</button>
+   ${f.balance>0?`<button class="btn small" onclick="markInvoicePaid('${x.id}')">Mark paid</button>`:""}
+   </div></td></tr>`;
+ }).join("")}
+ </table></div>`:`<div class="panel empty">No invoices yet.</div>`}`;
 }
-</div>
-
-</td>
-
-</tr>
-
-`;
-
-}).join("")}
-
-</table>
-
-</div>
-`
-
-:
-
-`
-<div class="panel empty">
-No invoices yet.
-</div>
-`
-
-}
-
-`;
-
-
-}
-
 
 async function renderFollowups(){
 
@@ -3591,26 +3509,79 @@ payment_status:f5.value
 
 
 async function savePayment(){
+ const amount=Number(f1.value||0);
+ const customerId=f2.value||null;
+ const method=f3.value;
+ const status=f4.value;
+ if(amount<=0){toast("Please enter a payment amount.","error");return;}
+ if(!customerId){toast("Please select a customer.","error");return;}
 
-await insert(
-"payments",
-{
+ const invoices=await rows("invoices");
+ const orders=await rows("orders");
 
-amount:Number(f1.value||0),
-customer_id:f2.value||null,
-order_id:null,
-method:f3.value.trim(),
-status:f4.value,
-payment_date:
-new Date()
-.toISOString()
-.slice(0,10)
+ // Automatically connect the payment to the customer's open invoice.
+ const openInvoices=invoices
+   .filter(i=>i.customer_id===customerId && String(i.status||"").toLowerCase()!=="paid")
+   .sort((a,b)=>String(a.due_date||"").localeCompare(String(b.due_date||"")));
+ const invoice=openInvoices[0]||null;
 
+ let orderId=invoice?.order_id||null;
+ if(!orderId){
+   const customerOrders=orders.filter(o=>o.customer_id===customerId);
+   if(customerOrders.length===1) orderId=customerOrders[0].id;
+ }
+
+ const result=await sb.from("payments").insert({
+   business_id:business.id,
+   amount,
+   customer_id:customerId,
+   order_id:orderId,
+   invoice_id:invoice?.id||null,
+   method,
+   status,
+   payment_date:new Date().toISOString().slice(0,10)
+ });
+
+ if(result.error){toast(result.error.message,"error");return;}
+
+ // Synchronize the related invoice and order so every page reads the same payment state.
+ if(status.toLowerCase()==="paid"){
+   if(invoice){
+     const priorPaid=await sb.from("payments")
+       .select("amount")
+       .eq("business_id",business.id)
+       .eq("invoice_id",invoice.id)
+       .eq("status","Paid");
+     const totalPaid=(priorPaid.data||[]).reduce((a,p)=>a+Number(p.amount||0),0);
+     const invoiceTotal=Number(invoice.amount||0);
+     const newStatus=totalPaid>=invoiceTotal ? "paid" : "partially paid";
+     const ur=await sb.from("invoices").update({
+       amount_paid:totalPaid,
+       status:newStatus,
+       paid_at:totalPaid>=invoiceTotal?new Date().toISOString():null
+     }).eq("id",invoice.id).eq("business_id",business.id);
+     if(ur.error && ur.error.code!=="42703") console.error(ur.error);
+   }
+
+   if(orderId){
+     const orderPayments=await sb.from("payments")
+       .select("amount")
+       .eq("business_id",business.id)
+       .eq("order_id",orderId)
+       .eq("status","Paid");
+     const paid= (orderPayments.data||[]).reduce((a,p)=>a+Number(p.amount||0),0);
+     const order=orders.find(o=>o.id===orderId);
+     const orderTotal=Number(order?.amount||0);
+     const paymentStatus=paid>=orderTotal?"Paid":paid>0?"Partially Paid":"Unpaid";
+     await sb.from("orders").update({payment_status:paymentStatus})
+       .eq("id",orderId).eq("business_id",business.id);
+   }
+ }
+
+ closeModal();
+ await renderAll();
+ toast(invoice?"Payment recorded and linked automatically.":"Payment recorded successfully.","success");
 }
-);
-
-}
-
 
 async function generateInvoiceNumber(){
  const list=await rows("invoices");
@@ -3914,24 +3885,43 @@ async function dbDelete(table,id,label){ if(!confirm('Delete this '+label+'? Thi
 function toast(text,type='success'){ const m=document.getElementById('modalBody'); if(m){m.insertAdjacentHTML('afterbegin',`<div class="message ${type}">${esc(text)}</div>`); setTimeout(()=>{const x=m.querySelector('.message');if(x)x.remove()},3000); } }
 async function editCustomer(id){const d=(await rows('customers')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Customer',`<div class="formrow"><label>Name</label><input id="e1" class="input" value="${esc(d.name)}"></div><div class="formrow"><label>WhatsApp</label><input id="e2" class="input" value="${esc(d.phone||'')}"></div><div class="formrow"><label>Value</label><input id="e3" class="input" type="number" value="${Number(d.value||0)}"></div><div class="formrow"><label>Status</label><select id="e4" class="input"><option ${d.status==='Potential'?'selected':''}>Potential</option><option ${d.status==='Customer'?'selected':''}>Customer</option><option ${d.status==='Inactive'?'selected':''}>Inactive</option></select></div><button class="btn gold" onclick="dbUpdate('customers','${id}',{name:e1.value.trim(),phone:e2.value.trim(),value:Number(e3.value||0),status:e4.value})">Save Changes</button>`)}
 async function deleteCustomer(id){
- if(!confirm('Delete this customer and all related orders, payments, invoices and follow ups? This cannot be undone.')) return;
+ if(!confirm('Delete this customer and everything linked to this customer? Orders, payments, invoices, follow ups and voice notes will be removed. This cannot be undone.')) return;
  const customerId=id;
  const businessId=business.id;
- const steps=[
-  ['invoices','customer_id'],
-  ['payments','customer_id'],
-  ['followups','customer_id'],
-  ['orders','customer_id']
+
+ // Delete children first because orders and invoices can restrict customer deletion.
+ const childTables=[
+   ["voice_notes","customer_id"],
+   ["invoice_reminders","customer_id"],
+   ["payments","customer_id"],
+   ["followups","customer_id"],
+   ["invoices","customer_id"],
+   ["orders","customer_id"],
+   ["tasks","customer_id"]
  ];
- for(const [table,column] of steps){
-  const r=await sb.from(table).delete().eq(column,customerId).eq('business_id',businessId);
-  if(r.error){toast('Customer could not be deleted: '+r.error.message,'error');return;}
+
+ for(const [table,column] of childTables){
+   const r=await sb.from(table).delete().eq(column,customerId).eq("business_id",businessId);
+   // tasks.customer_id may not exist in older KabFlow databases, and some optional
+   // tables may not have been created. Ignore only those schema errors.
+   if(r.error){
+     if(r.error.code!=="42P01" && r.error.code!=="42703"){
+       toast("Customer deletion stopped: "+r.error.message,"error");
+       return;
+     }
+   }
  }
- const r=await sb.from('customers').delete().eq('id',customerId).eq('business_id',businessId);
- if(r.error){toast('Customer could not be deleted: '+r.error.message,'error');return;}
+
+ const r=await sb.from("customers").delete()
+   .eq("id",customerId).eq("business_id",businessId);
+ if(r.error){
+   toast("Customer could not be deleted: "+r.error.message,"error");
+   return;
+ }
+
  await renderAll();
- showScreen('customers');
- toast('Customer deleted successfully','success');
+ showScreen("customers");
+ toast("Customer and linked records deleted successfully","success");
 }
 async function editOrder(id){const d=(await rows('orders')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Order',`<div class="formrow"><label>Item</label><input id="e1" class="input" value="${esc(d.item)}"></div><div class="formrow"><label>Amount</label><input id="e2" class="input" type="number" value="${Number(d.amount||0)}"></div><div class="formrow"><label>Order Status</label><select id="e3" class="input"><option>Pending</option><option>Processing</option><option>Ready</option><option>Delivered</option><option>Cancelled</option></select></div><div class="formrow"><label>Payment Status</label><select id="e4" class="input"><option>UNPAID</option><option>PARTIALLY PAID</option><option>PAID</option></select></div><button class="btn gold" onclick="dbUpdate('orders','${id}',{item:e1.value.trim(),amount:Number(e2.value||0),status:e3.value,payment_status:e4.value})">Save Changes</button>`);e3.value=d.status||'Pending';e4.value=d.payment_status||'UNPAID'}
 async function deleteOrder(id){await dbDelete('orders',id,'order')}
@@ -3949,7 +3939,7 @@ async function viewInvoice(id){
  const address=business?.address||"";
  const phone=business?.phone||"";
  const email=business?.owner_email||currentUser?.email||"";
- const status=String(inv.status||"draft").toLowerCase()==="paid"?"PAID":"UNPAID";
+ const status=financial.balance<=0?"PAID":financial.paid>0?"PARTIALLY PAID":"UNPAID";
 
  const invoiceHtml=`<!doctype html><html><head><meta charset="utf-8"><title>${esc(inv.invoice_number||"Invoice")}</title><style>
  body{font-family:Arial,sans-serif;background:#f3f5f8;margin:0;padding:30px;color:#172033}
@@ -3999,7 +3989,7 @@ async function viewInvoice(id){
   </div>
 
   ${inv.notes?`<div class="notes"><strong>Notes</strong><p>${esc(inv.notes)}</p></div>`:""}
-  <p class="muted" style="margin-top:35px;text-align:center">Thank you for your business.</p>
+  <p class="muted" style="margin-top:35px;text-align:center">Thank you for your Purchase/Patronage</p>
  </div></body></html>`;
 
  const w=window.open("","_blank","width=900,height=800");

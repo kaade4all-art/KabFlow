@@ -3984,6 +3984,48 @@ async function editOrder(id){const d=(await rows('orders')).find(x=>x.id===id);i
 async function deleteOrder(id){await dbDelete('orders',id,'order')}
 async function editPayment(id){const d=(await rows('payments')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Payment',`<div class="formrow"><label>Amount</label><input id="e1" class="input" type="number" value="${Number(d.amount||0)}"></div><div class="formrow"><label>Method</label><select id="e2" class="input"><option>Transfer</option><option>Cash</option><option>POS</option><option>Other</option></select></div><div class="formrow"><label>Status</label><select id="e3" class="input"><option>Paid</option><option>Pending</option><option>Failed</option></select></div><button class="btn gold" onclick="dbUpdate('payments','${id}',{amount:Number(e1.value||0),method:e2.value,status:e3.value})">Save Changes</button>`);const legacy={"Bank Transfer":"Transfer","Card":"Other"};e2.value=legacy[d.method]||d.method||'Cash';e3.value=d.status||'Paid'}
 async function deletePayment(id){await dbDelete('payments',id,'payment')}
+async function getInvoiceFinancials(inv){
+  const payments=await rows("payments");
+  const orders=await rows("orders");
+
+  const linkedOrder=inv.order_id ? orders.find(o=>o.id===inv.order_id) : null;
+
+  const total=Number(
+    linkedOrder?.amount ??
+    inv.amount ??
+    0
+  );
+
+  let paid=Number(inv.amount_paid||0);
+
+  const linkedPayments=payments.filter(p=>
+    p.invoice_id===inv.id &&
+    String(p.status||"").toLowerCase()==="paid"
+  );
+
+  if(linkedPayments.length){
+    paid=linkedPayments.reduce((sum,p)=>sum+Number(p.amount||0),0);
+  }
+
+  // Older invoices may not have invoice_id on their payments.
+  if(!linkedPayments.length && paid===0){
+    const customerPayments=payments.filter(p=>
+      p.customer_id===inv.customer_id &&
+      String(p.status||"").toLowerCase()==="paid"
+    );
+    if(customerPayments.length){
+      paid=customerPayments.reduce((sum,p)=>sum+Number(p.amount||0),0);
+    }
+  }
+
+  paid=Math.min(Math.max(paid,0),Math.max(total,0));
+  return {
+    total,
+    paid,
+    balance:Math.max(total-paid,0)
+  };
+}
+
 async function viewInvoice(id){
  const w=window.open("","_blank","width=900,height=800");
  if(!w){

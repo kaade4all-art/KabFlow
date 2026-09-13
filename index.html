@@ -2659,76 +2659,69 @@ No tasks yet.
 
 
 async function renderSales(){
+  const orders=await rows("orders");
+  const payments=await rows("payments");
 
-const payments=
-await rows("payments");
+  const totalSales=orders.reduce(
+    (total,x)=>total+Number(x.amount||0),
+    0
+  );
 
-const paid=
-payments
-.filter(x=>
-String(x.status||"").toLowerCase()==="paid"
-)
-.reduce(
-(total,x)=>total+Number(x.amount||0),
-0
-);
+  const totalCollected=payments
+    .filter(x=>String(x.status||"").toLowerCase()==="paid")
+    .reduce(
+      (total,x)=>total+Number(x.amount||0),
+      0
+    );
 
-const pending=
-payments
-.filter(x=>
-String(x.status||"").toLowerCase()!=="paid"
-)
-.reduce(
-(total,x)=>total+Number(x.amount||0),
-0
-);
+  // Calculate the outstanding balance from each order.
+  // This prevents Pending from showing 0 simply because payment
+  // records have been marked Paid incorrectly or are unrelated.
+  const paidByOrder=new Map();
 
-document.getElementById("sales").innerHTML=`
+  payments
+    .filter(x=>x.order_id && String(x.status||"").toLowerCase()==="paid")
+    .forEach(x=>{
+      paidByOrder.set(
+        x.order_id,
+        Number(paidByOrder.get(x.order_id)||0)+Number(x.amount||0)
+      );
+    });
 
-<div class="grid">
+  const pending=orders.reduce((total,order)=>{
+    const orderAmount=Number(order.amount||0);
+    const orderPaid=Number(paidByOrder.get(order.id)||0);
+    return total+Math.max(orderAmount-orderPaid,0);
+  },0);
 
-<div class="card">
+  document.getElementById("sales").innerHTML=`
+    <div class="grid">
 
-<div class="muted">
-Total collected
-</div>
+      <div class="card">
+        <div class="muted">Total Sales</div>
+        <div class="stat">${money(totalSales)}</div>
+      </div>
 
-<div class="stat">
-${money(paid)}
-</div>
+      <div class="card">
+        <div class="muted">Total Collected</div>
+        <div class="stat">${money(totalCollected)}</div>
+      </div>
 
-</div>
+      <div class="card">
+        <div class="muted">Pending</div>
+        <div class="stat">${money(pending)}</div>
+      </div>
 
-<div class="card">
+    </div>
 
-<div class="muted">
-Pending payments
-</div>
-
-<div class="stat">
-${money(pending)}
-</div>
-
-</div>
-
-</div>
-
-<div class="panel section">
-
-<h2>
-Sales insights
-</h2>
-
-<p class="muted">
-Use Payments and Orders to track what has been collected and what is still pending.
-</p>
-
-</div>
-
-`;
-
+    <div class="panel section">
+      <h2>Sales insights</h2>
+      <p class="muted">
+        Total Sales is the value of all orders. Total Collected is the amount actually marked Paid. Pending is the outstanding balance remaining on orders.
+      </p>
+    </div>
+  `;
 }
-
 
 async function renderTeam(){
 

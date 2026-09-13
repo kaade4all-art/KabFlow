@@ -2991,11 +2991,13 @@ Customer
 <select
 id="f2"
 class="input"
+onchange="prepareOrderForCustomer(this.value)"
 >
 
 ${await customerOptions()}
 
 </select>
+<div id="orderAutoLink" class="muted" style="margin-top:7px">Select a customer to keep this order automatically linked.</div>
 
 </div>
 
@@ -3452,9 +3454,10 @@ if(type==="invoice"){
    invoiceInput.readOnly=true;
  }
 }
-if((type==="invoice" || type==="payment") && customerId){
+if((type==="order" || type==="invoice" || type==="payment") && customerId){
  const customerSelect=document.getElementById("f2");
  if(customerSelect) customerSelect.value=customerId;
+ if(type==="order") await prepareOrderForCustomer(customerId);
  if(type==="payment") await preparePaymentForCustomer(customerId);
  if(type==="invoice") await prepareInvoiceForCustomer(customerId);
 }
@@ -3506,20 +3509,32 @@ status:"Potential"
 
 
 async function saveOrder(){
+ const item=f1.value.trim();
+ const customerId=f2.value||null;
+ const amount=Number(f3.value||0);
+ const status=f4.value;
 
-await insert(
-"orders",
-{
+ if(!item){toast("Please enter the order item.","error");return;}
+ if(!customerId){toast("Please select a customer.","error");return;}
+ if(amount<=0){toast("Please enter a valid order amount.","error");return;}
 
-item:f1.value.trim(),
-customer_id:f2.value||null,
-amount:Number(f3.value||0),
-status:f4.value,
-payment_status:f5.value
+ // A new order always starts unpaid. Payment status is controlled automatically
+ // from actual payment records, so it cannot become out of sync.
+ const result=await sb.from("orders").insert({
+  business_id:business.id,
+  item,
+  customer_id:customerId,
+  amount,
+  status,
+  payment_status:"UNPAID"
+ }).select().single();
 
-}
-);
+ if(result.error){toast(result.error.message,"error");return;}
 
+ closeModal();
+ await renderAll();
+ await openCustomerDetails(customerId);
+ toast("Order created and automatically linked to the customer.","success");
 }
 
 
@@ -3613,6 +3628,14 @@ async function savePayment(){
  toast(orderId||invoice ? "Payment recorded and automatically linked." : "Payment recorded successfully.","success");
 }
 
+async function prepareOrderForCustomer(customerId){
+ if(!customerId)return;
+ const customers=await rows("customers");
+ const c=customers.find(x=>x.id===customerId);
+ const link=document.getElementById("orderAutoLink");
+ if(link) link.textContent=c ? `This order will automatically belong to ${c.name}. Payments for this order will be linked automatically.` : "";
+}
+
 async function preparePaymentForCustomer(customerId){
  if(!customerId)return;
  try{
@@ -3646,9 +3669,9 @@ async function preparePaymentForCustomer(customerId){
   const link=document.getElementById("paymentAutoLink");
   if(link){
    link.textContent=invoice
-    ? `Automatically linked to invoice ${invoice.invoice_number||""}`
+    ? `Automatically linked to invoice ${invoice.invoice_number||""}${orderId ? " and its order" : ""}. Amount filled with the outstanding balance.`
     : orderId
-     ? "Automatically linked to the customer's open order"
+     ? `Automatically linked to the customer's open order. Amount filled with the outstanding balance.`
      : "No open order or invoice found. Payment will be saved to the customer.";
   }
  }catch(e){console.warn("Payment auto link preparation failed",e)}

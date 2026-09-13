@@ -2526,6 +2526,10 @@ async function renderTasks(){
 
 const data=
 await rows("tasks");
+const customers=
+await rows("customers");
+const customerMap=
+new Map(customers.map(c=>[c.id,c]));
 
 document.getElementById("tasks").innerHTML=`
 
@@ -2553,6 +2557,7 @@ data.length
 
 <tr>
 <th>Task</th>
+<th>Customer</th>
 <th>Due</th>
 <th>Priority</th>
 <th>Status</th>
@@ -2565,6 +2570,10 @@ ${data.map(x=>`
 
 <td>
 ${esc(x.title)}
+</td>
+
+<td>
+${esc(customerMap.get(x.customer_id)?.name||"")}
 </td>
 
 <td>
@@ -3331,19 +3340,23 @@ field(
 
 +
 
-field(
-"Due Date",
-"f2",
-"date"
-)
-
-+
-
 `
 
 <div class="formrow">
+<label for="f2">Customer</label>
+<select id="f2" class="input">
+<option value="">No customer</option>
+${(await rows("customers")).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("")}
+</select>
+</div>
 
-<label for="f3">
+<div class="formrow">
+<label for="f3">Due Date</label>
+<input id="f3" class="input" type="date">
+</div>
+
+<div class="formrow">
+<label for="f4">
 Priority
 </label>
 
@@ -3513,177 +3526,73 @@ async function savePayment(){
  const customerId=f2.value||null;
  const method=f3.value;
  const status=f4.value;
+
  if(amount<=0){toast("Please enter a payment amount.","error");return;}
  if(!customerId){toast("Please select a customer.","error");return;}
 
  const invoices=await rows("invoices");
  const orders=await rows("orders");
 
- // Automatically connect the payment to the customer's open invoice.
  const openInvoices=invoices
-   .filter(i=>i.customer_id===customerId && String(i.status||"").toLowerCase()!=="paid")
-   .sort((a,b)=>String(a.due_date||"").localeCompare(String(b.due_date||"")));
+  .filter(i=>i.customer_id===customerId && String(i.status||"").toLowerCase()!=="paid")
+  .sort((a,b)=>String(a.due_date||"").localeCompare(String(b.due_date||"")));
  const invoice=openInvoices[0]||null;
 
  let orderId=invoice?.order_id||null;
  if(!orderId){
-   const customerOrders=orders.filter(o=>o.customer_id===customerId);
-   if(customerOrders.length===1) orderId=customerOrders[0].id;
+  const customerOrders=orders.filter(o=>o.customer_id===customerId);
+  if(customerOrders.length===1) orderId=customerOrders[0].id;
  }
 
  const result=await sb.from("payments").insert({
-   business_id:business.id,
-   amount,
-   customer_id:customerId,
-   order_id:orderId,
-   invoice_id:invoice?.id||null,
-   method,
-   status,
-   payment_date:new Date().toISOString().slice(0,10)
- });
+  business_id:business.id,
+  amount,
+  customer_id:customerId,
+  order_id:orderId,
+  invoice_id:invoice?.id||null,
+  method,
+  status,
+  payment_date:new Date().toISOString().slice(0,10)
+ }).select().single();
 
  if(result.error){toast(result.error.message,"error");return;}
 
- // Synchronize the related invoice and order so every page reads the same payment state.
- if(status.toLowerCase()==="paid"){
-   if(invoice){
-     const priorPaid=await sb.from("payments")
-       .select("amount")
-       .eq("business_id",business.id)
-       .eq("invoice_id",invoice.id)
-       .eq("status","Paid");
-     const totalPaid=(priorPaid.data||[]).reduce((a,p)=>a+Number(p.amount||0),0);
-     const invoiceTotal=Number(invoice.amount||0);
-     const newStatus=totalPaid>=invoiceTotal ? "paid" : "partially paid";
-     const ur=await sb.from("invoices").update({
-       amount_paid:totalPaid,
-       status:newStatus,
-       paid_at:totalPaid>=invoiceTotal?new Date().toISOString():null
-     }).eq("id",invoice.id).eq("business_id",business.id);
-     if(ur.error && ur.error.code!=="42703") console.error(ur.error);
-   }
+ if(String(status).toLowerCase()==="paid"){
+  if(invoice){
+   const invoiceTotal=Number(
+    (orderId && orders.find(o=>o.id===orderId)?.amount) ??
+    invoice.amount ?? 0
+   );
+   const existingPaid=Number(invoice.amount_paid||0);
+   const newPaid=Math.min(existingPaid+amount,invoiceTotal);
+   await sb.from("invoices").update({
+    amount_paid:newPaid,
+    status:newPaid>=invoiceTotal && invoiceTotal>0?"paid":"draft",
+    paid_at:newPaid>=invoiceTotal && invoiceTotal>0?new Date().toISOString():null
+   }).eq("id",invoice.id).eq("business_id",business.id);
+  }
 
-   if(orderId){
-     const orderPayments=await sb.from("payments")
-       .select("amount")
-       .eq("business_id",business.id)
-       .eq("order_id",orderId)
-       .eq("status","Paid");
-     const paid= (orderPayments.data||[]).reduce((a,p)=>a+Number(p.amount||0),0);
-     const order=orders.find(o=>o.id===orderId);
-     const orderTotal=Number(order?.amount||0);
-     const paymentStatus=paid>=orderTotal?"Paid":paid>0?"Partially Paid":"Unpaid";
-     await sb.from("orders").update({payment_status:paymentStatus})
-       .eq("id",orderId).eq("business_id",business.id);
-   }
+  if(orderId){
+   const freshPayments=await rows("payments");
+   const totalPaid=freshPayments
+    .filter(p=>p.order_id===orderId && String(p.status||"").toLowerCase()==="paid")
+    .reduce((a,p)=>a+Number(p.amount||0),0);
+   const order=orders.find(o=>o.id===orderId);
+   const orderTotal=Number(order?.amount||0);
+   const paymentStatus=totalPaid>=orderTotal && orderTotal>0
+    ?"PAID"
+    :totalPaid>0
+    ?"PARTIALLY PAID"
+    :"UNPAID";
+   await sb.from("orders").update({payment_status:paymentStatus})
+    .eq("id",orderId).eq("business_id",business.id);
+  }
  }
 
  closeModal();
  await renderAll();
- toast(invoice?"Payment recorded and linked automatically.":"Payment recorded successfully.","success");
+ toast("Payment recorded and linked records updated.","success");
 }
-
-async function generateInvoiceNumber(){
- const list=await rows("invoices");
- const year=new Date().getFullYear();
- const month=String(new Date().getMonth()+1).padStart(2,"0");
- const prefix=`INV-${year}${month}-`;
- let max=0;
- list.forEach(x=>{
-   const n=String(x.invoice_number||"");
-   if(n.startsWith(prefix)){
-     const m=n.match(/-(\d+)$/);
-     if(m) max=Math.max(max,Number(m[1]));
-   }
- });
- return prefix+String(max+1).padStart(3,"0");
-}
-
-
-async function getInvoiceFinancials(inv){
- const orders=await rows("orders");
- const payments=await rows("payments");
- const invoices=await rows("invoices");
-
- let order=inv.order_id ? orders.find(o=>o.id===inv.order_id) : null;
-
- // If the invoice was created before order linking was added and this
- // customer has exactly one order, use that order as the invoice total.
- if(!order && inv.customer_id){
-   const customerOrders=orders.filter(o=>o.customer_id===inv.customer_id);
-   if(customerOrders.length===1) order=customerOrders[0];
- }
-
- const total=order && order.amount!=null
-   ? Number(order.amount||0)
-   : Number(inv.amount||0);
-
- let paid=payments
-   .filter(p=>p.invoice_id===inv.id &&
-     String(p.status||"").toLowerCase()==="paid")
-   .reduce((a,p)=>a+Number(p.amount||0),0);
-
- // Support older payments that were recorded against the customer/order
- // but were not linked to invoice_id.
- if(!paid && inv.customer_id){
-   const customerOpenInvoices=invoices.filter(x=>
-     x.customer_id===inv.customer_id &&
-     String(x.status||"").toLowerCase()!=="paid"
-   );
-
-   if(customerOpenInvoices.length===1){
-     paid=payments
-       .filter(p=>p.customer_id===inv.customer_id &&
-         String(p.status||"").toLowerCase()==="paid")
-       .reduce((a,p)=>a+Number(p.amount||0),0);
-   }
- }
-
- const balance=Math.max(total-paid,0);
- return {total,paid,balance};
-}
-
-async function saveInvoice(){
- const customerId=f2.value||null;
- if(!customerId){toast("Please select a customer.","error");return;}
- const amount=Number(f3.value||0);
- if(amount<=0){toast("Please enter the invoice amount.","error");return;}
- const invoiceNumber=await generateInvoiceNumber();
- f1.value=invoiceNumber;
-
- const allOrders=await rows("orders");
- const customerOrders=allOrders.filter(o=>o.customer_id===customerId);
- const linkedOrderId=customerOrders.length===1 ? customerOrders[0].id : null;
-
- const ok=await insert("invoices",{
-   invoice_number:invoiceNumber,
-   customer_id:customerId,
-   order_id:linkedOrderId,
-   amount:amount,
-   due_date:f4.value||null,
-   status:"draft",
-   notes:f5.value.trim()
- });
- if(ok) toast("Invoice "+invoiceNumber+" created successfully.","success");
-}
-
-
-async function saveFollowup(){
-
-await insert(
-"followups",
-{
-
-customer_id:f2.value||null,
-note:f1.value.trim(),
-followup_date:f3.value||null,
-done:false
-
-}
-);
-
-}
-
 
 async function saveTask(){
 
@@ -3692,8 +3601,9 @@ await insert(
 {
 
 title:f1.value.trim(),
-due_date:f2.value||null,
-priority:f3.value,
+customer_id:f2.value||null,
+due_date:f3.value||null,
+priority:f4.value,
 status:"To Do"
 
 }
@@ -4014,7 +3924,19 @@ async function editInvoice(id){const d=(await rows('invoices')).find(x=>x.id===i
 async function deleteInvoice(id){await dbDelete('invoices',id,'invoice')}
 async function editFollowup(id){const d=(await rows('followups')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Follow Up',`<div class="formrow"><label>Note</label><input id="e1" class="input" value="${esc(d.note||'')}"></div><div class="formrow"><label>Date</label><input id="e2" class="input" type="date" value="${esc(d.followup_date||'')}"></div><button class="btn gold" onclick="dbUpdate('followups','${id}',{note:e1.value.trim(),followup_date:e2.value||null})">Save Changes</button>`)}
 async function deleteFollowup(id){await dbDelete('followups',id,'follow up')}
-async function editTask(id){const d=(await rows('tasks')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Task',`<div class="formrow"><label>Task</label><input id="e1" class="input" value="${esc(d.title||'')}"></div><div class="formrow"><label>Due Date</label><input id="e2" class="input" type="date" value="${esc(d.due_date||'')}"></div><div class="formrow"><label>Priority</label><select id="e3" class="input"><option>Low</option><option>Normal</option><option>High</option></select></div><button class="btn gold" onclick="dbUpdate('tasks','${id}',{title:e1.value.trim(),due_date:e2.value||null,priority:e3.value})">Save Changes</button>`);e3.value=d.priority||'Normal'}
+async function editTask(id){
+ const d=(await rows('tasks')).find(x=>x.id===id);
+ if(!d)return;
+ const customers=await rows('customers');
+ openModalHtml('Edit Task',`
+ <div class="formrow"><label>Task</label><input id="e1" class="input" value="${esc(d.title||'')}"></div>
+ <div class="formrow"><label>Customer</label><select id="e2" class="input"><option value="">No customer</option>${customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
+ <div class="formrow"><label>Due Date</label><input id="e3" class="input" type="date" value="${esc(d.due_date||'')}"></div>
+ <div class="formrow"><label>Priority</label><select id="e4" class="input"><option>Low</option><option>Normal</option><option>High</option></select></div>
+ <button class="btn gold" onclick="dbUpdate('tasks','${id}',{title:e1.value.trim(),customer_id:e2.value||null,due_date:e3.value||null,priority:e4.value})">Save Changes</button>`);
+ e2.value=d.customer_id||'';
+ e4.value=d.priority||'Normal';
+}
 async function deleteTask(id){await dbDelete('tasks',id,'task')}
 function openModalHtml(title,body){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=body;document.getElementById('modal').classList.add('show')}
 async function startVoice(){

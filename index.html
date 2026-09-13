@@ -2316,6 +2316,7 @@ ${esc(x.payment_date||"")}
 
 <td>
 <div class="row-actions">
+<button class="btn small gold" onclick="viewPaymentReceipt('${x.id}')">View Receipt</button>
 <button class="btn small" onclick="editPayment('${x.id}')">Edit</button>
 <button class="btn small danger" onclick="deletePayment('${x.id}')">Delete</button>
 </div>
@@ -3984,8 +3985,19 @@ async function deleteOrder(id){await dbDelete('orders',id,'order')}
 async function editPayment(id){const d=(await rows('payments')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Payment',`<div class="formrow"><label>Amount</label><input id="e1" class="input" type="number" value="${Number(d.amount||0)}"></div><div class="formrow"><label>Method</label><select id="e2" class="input"><option>Transfer</option><option>Cash</option><option>POS</option><option>Other</option></select></div><div class="formrow"><label>Status</label><select id="e3" class="input"><option>Paid</option><option>Pending</option><option>Failed</option></select></div><button class="btn gold" onclick="dbUpdate('payments','${id}',{amount:Number(e1.value||0),method:e2.value,status:e3.value})">Save Changes</button>`);const legacy={"Bank Transfer":"Transfer","Card":"Other"};e2.value=legacy[d.method]||d.method||'Cash';e3.value=d.status||'Paid'}
 async function deletePayment(id){await dbDelete('payments',id,'payment')}
 async function viewInvoice(id){
+ const w=window.open("","_blank","width=900,height=800");
+ if(!w){
+   toast("Please allow pop ups to view the invoice.","error");
+   return;
+ }
+ w.document.write("<p style='font-family:Arial;padding:30px'>Loading invoice...</p>");
+
  const inv=(await rows("invoices")).find(x=>x.id===id);
- if(!inv)return;
+ if(!inv){
+   w.close();
+   toast("Invoice not found.","error");
+   return;
+ }
 
  const customers=await rows("customers");
  const c=customers.find(x=>x.id===inv.customer_id)||{};
@@ -4048,9 +4060,78 @@ async function viewInvoice(id){
   <p class="muted" style="margin-top:35px;text-align:center">Thank you for your Purchase/Patronage</p>
  </div></body></html>`;
 
- const w=window.open("","_blank","width=900,height=800");
- if(!w){toast("Please allow pop ups to view the invoice.","error");return;}
- w.document.open();w.document.write(invoiceHtml);w.document.close();
+ w.document.open();
+ w.document.write(invoiceHtml);
+ w.document.close();
+}
+
+async function viewPaymentReceipt(id){
+ const w=window.open("","_blank","width=700,height=800");
+ if(!w){
+   toast("Please allow pop ups to view the receipt.","error");
+   return;
+ }
+ w.document.write("<p style='font-family:Arial;padding:30px'>Loading receipt...</p>");
+
+ const payment=(await rows("payments")).find(x=>x.id===id);
+ if(!payment){
+   w.close();
+   toast("Payment not found.","error");
+   return;
+ }
+
+ const customers=await rows("customers");
+ const orders=await rows("orders");
+ const invoices=await rows("invoices");
+
+ const customer=customers.find(c=>c.id===payment.customer_id)||{};
+ const order=orders.find(o=>o.id===payment.order_id)||null;
+ const invoice=invoices.find(i=>i.id===payment.invoice_id)||null;
+
+ const businessName=business?.name||"Your Business Name";
+ const address=business?.address||"";
+ const phone=business?.phone||"";
+ const email=business?.owner_email||currentUser?.email||"";
+
+ const receiptNumber="RCT-"+String(payment.id||"").slice(0,8).toUpperCase();
+ const receiptHtml=`<!doctype html><html><head><meta charset="utf-8"><title>Payment Receipt</title>
+ <style>
+ body{font-family:Arial,sans-serif;background:#f3f5f8;margin:0;padding:30px;color:#172033}
+ .receipt{max-width:650px;margin:auto;background:#fff;padding:38px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+ .head{border-bottom:3px solid #0b2d5c;padding-bottom:20px;display:flex;justify-content:space-between;gap:20px}
+ .brand{font-size:28px;font-weight:800;color:#0b2d5c}.brand span{color:#d5a936}
+ .right{text-align:right}.title{font-size:28px;font-weight:800;margin-bottom:5px}
+ .muted{color:#697386;font-size:13px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:25px 0}
+ .box{background:#f7f8fa;padding:16px;border-radius:8px}.label{font-size:11px;color:#697386;text-transform:uppercase;margin-bottom:5px}.value{font-weight:700}
+ .amount{font-size:30px;font-weight:800;color:#0b2d5c;margin:25px 0}
+ .line{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid #e5e7eb}
+ .print{margin:20px auto;display:block;padding:11px 18px;border:0;border-radius:7px;background:#d5a936;color:#111;font-weight:700;cursor:pointer}
+ @media print{body{background:#fff;padding:0}.receipt{box-shadow:none;max-width:none;border-radius:0}.print{display:none}}
+ @media(max-width:600px){.receipt{padding:22px}.head{display:block}.right{text-align:left;margin-top:15px}.grid{grid-template-columns:1fr}}
+ </style></head><body>
+ <button class="print" onclick="window.print()">Print / Save as PDF</button>
+ <div class="receipt">
+  <div class="head">
+   <div><div class="brand">Kab<span>Flow</span></div><strong>${esc(businessName)}</strong>
+   <div class="muted">${esc(address)}</div><div class="muted">${esc(phone)}${email?" | "+esc(email):""}</div></div>
+   <div class="right"><div class="title">PAYMENT RECEIPT</div><div class="muted">${esc(receiptNumber)}</div></div>
+  </div>
+  <div class="grid">
+   <div class="box"><div class="label">Received From</div><div class="value">${esc(customer.name||"Customer")}</div><div class="muted">${esc(customer.phone||"")}</div></div>
+   <div class="box"><div class="label">Payment Date</div><div class="value">${esc(payment.payment_date||"")}</div></div>
+  </div>
+  <div class="amount">${money(payment.amount)}</div>
+  <div class="line"><span>Payment Method</span><strong>${esc(payment.method||"")}</strong></div>
+  <div class="line"><span>Payment Status</span><strong>${esc(payment.status||"")}</strong></div>
+  ${invoice?`<div class="line"><span>Invoice</span><strong>${esc(invoice.invoice_number||"")}</strong></div>`:""}
+  ${order?`<div class="line"><span>Order</span><strong>${esc(order.item||"Order")}</strong></div>`:""}
+  ${payment.notes?`<div style="margin-top:25px"><strong>Notes</strong><p>${esc(payment.notes)}</p></div>`:""}
+  <p class="muted" style="margin-top:35px;text-align:center">Thank you for your Purchase/Patronage</p>
+ </div></body></html>`;
+
+ w.document.open();
+ w.document.write(receiptHtml);
+ w.document.close();
 }
 
 async function shareInvoiceWhatsApp(id){

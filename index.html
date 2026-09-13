@@ -3455,6 +3455,7 @@ if((type==="invoice" || type==="payment") && customerId){
  const customerSelect=document.getElementById("f2");
  if(customerSelect) customerSelect.value=customerId;
  if(type==="payment") await preparePaymentForCustomer(customerId);
+ if(type==="invoice") await prepareInvoiceForCustomer(customerId);
 }
 
 }
@@ -3650,6 +3651,93 @@ async function preparePaymentForCustomer(customerId){
      : "No open order or invoice found. Payment will be saved to the customer.";
   }
  }catch(e){console.warn("Payment auto link preparation failed",e)}
+}
+
+async function prepareInvoiceForCustomer(customerId){
+ if(!customerId)return;
+ try{
+  const orders=await rows("orders");
+  const payments=await rows("payments");
+  const invoices=await rows("invoices");
+
+  const openOrders=orders.filter(o=>o.customer_id===customerId).map(o=>{
+   const paid=payments.filter(p=>p.order_id===o.id && String(p.status||"").toLowerCase()==="paid")
+    .reduce((a,p)=>a+Number(p.amount||0),0);
+   const invoiced=invoices.filter(i=>i.order_id===o.id && String(i.status||"").toLowerCase()!=="paid")
+    .reduce((a,i)=>a+Number(i.amount||0),0);
+   return {...o,_balance:Math.max(Number(o.amount||0)-paid,0),_invoiced:invoiced};
+  }).filter(o=>o._balance>0)
+    .sort((a,b)=>String(a.created_at||"").localeCompare(String(b.created_at||"")));
+
+  const order=openOrders[openOrders.length-1]||null;
+  const amountInput=document.getElementById("f3");
+  const link=document.getElementById("invoiceAutoLink");
+
+  if(order){
+   if(amountInput && (!amountInput.value || Number(amountInput.value)<=0)) amountInput.value=order._balance;
+   if(link) link.textContent=`Automatically linked to open order: ${order.item||"Order"}`;
+  }else{
+   if(link) link.textContent="No open order found. You can enter the invoice amount manually.";
+  }
+ }catch(e){console.warn("Invoice auto link preparation failed",e)}
+}
+
+async function generateInvoiceNumber(){
+ const invoices=await rows("invoices");
+ const now=new Date();
+ const prefix=`INV-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}-`;
+ const nums=invoices.map(i=>String(i.invoice_number||"")).filter(n=>n.startsWith(prefix)).map(n=>Number(n.slice(prefix.length))).filter(Number.isFinite);
+ const next=(nums.length?Math.max(...nums):0)+1;
+ return `${prefix}${String(next).padStart(3,"0")}`;
+}
+
+async function saveInvoice(){
+ const customerId=f2.value||null;
+ const amount=Number(f3.value||0);
+ const dueDate=f4.value||null;
+ const notes=f5.value.trim();
+
+ if(!customerId){toast("Please select a customer.","error");return;}
+ if(amount<=0){toast("Please enter a valid invoice amount.","error");return;}
+
+ const orders=await rows("orders");
+ const payments=await rows("payments");
+ const invoices=await rows("invoices");
+
+ let orderId=null;
+ const openOrders=orders.filter(o=>o.customer_id===customerId).map(o=>{
+  const paid=payments.filter(p=>p.order_id===o.id && String(p.status||"").toLowerCase()==="paid")
+   .reduce((a,p)=>a+Number(p.amount||0),0);
+  return {...o,_balance:Math.max(Number(o.amount||0)-paid,0)};
+ }).filter(o=>o._balance>0)
+   .sort((a,b)=>String(a.created_at||"").localeCompare(String(b.created_at||"")));
+
+ if(openOrders.length) orderId=openOrders[openOrders.length-1].id;
+
+ let invoiceNumber=await generateInvoiceNumber();
+ while(invoices.some(i=>i.invoice_number===invoiceNumber)){
+  const m=invoiceNumber.match(/^(INV-\d{6}-)(\d+)$/);
+  invoiceNumber=m?m[1]+String(Number(m[2])+1).padStart(3,"0"):invoiceNumber+"-1";
+ }
+
+ const result=await sb.from("invoices").insert({
+  business_id:business.id,
+  customer_id:customerId,
+  order_id:orderId,
+  invoice_number:invoiceNumber,
+  amount,
+  amount_paid:0,
+  due_date:dueDate,
+  status:"draft",
+  paid_at:null,
+  notes
+ }).select().single();
+
+ if(result.error){toast(result.error.message,"error");return;}
+
+ closeModal();
+ await renderAll();
+ toast(`Invoice ${invoiceNumber} created successfully and linked automatically.` ,"success");
 }
 
 async function saveTask(){

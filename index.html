@@ -707,6 +707,16 @@ button{
 
 .invoice-actions{display:flex;gap:6px;flex-wrap:wrap}
 .invoice-print-note{font-size:13px;color:#697386;margin-top:8px}
+
+.linkbtn{
+  background:none;
+  border:0;
+  padding:0;
+  color:var(--blue);
+  font-weight:700;
+  cursor:pointer;
+  text-decoration:underline;
+}
 </style>
 </head>
 
@@ -2403,98 +2413,74 @@ async function renderInvoices(){
 }
 
 async function renderFollowups(){
+  const data=await rows("followups");
+  const customers=await rows("customers");
+  const customerMap=new Map(customers.map(c=>[c.id,c]));
 
-const data=
-await rows("followups");
+  document.getElementById("followups").innerHTML=`
+    <div class="sectionhead">
+      <h2>Follow Ups</h2>
+      <button class="btn gold" onclick="openForm('followup')">+ New Follow Up</button>
+    </div>
 
-document.getElementById("followups").innerHTML=`
+    ${
+      data.length
+      ? `
+      <div class="tablewrap">
+        <table class="table">
+          <tr>
+            <th>Customer</th>
+            <th>Note</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
 
-<div class="sectionhead">
+          ${data.map(x=>{
+            const customer=customerMap.get(x.customer_id);
+            const customerName=customer?.name||"Customer not linked";
 
-<h2>Follow Ups</h2>
+            return `
+              <tr>
+                <td>
+                  ${
+                    customer
+                    ? `<button class="linkbtn" onclick="openCustomerDetails('${x.customer_id}')">${esc(customerName)}</button>`
+                    : `<span class="muted">${esc(customerName)}</span>`
+                  }
+                </td>
 
-<button
-class="btn gold"
-onclick="openForm('followup')"
->
-+ Schedule Follow Up
-</button>
+                <td>${esc(x.note||"")}</td>
 
-</div>
+                <td>${esc(x.followup_date||"")}</td>
 
-${
-data.length
-?
+                <td>
+                  <span class="badge ${x.done?"success":""}">
+                    ${x.done?"Done":"Pending"}
+                  </span>
+                </td>
 
-`
-<div class="tablewrap">
-
-<table class="table">
-
-<tr>
-<th>Note</th>
-<th>Date</th>
-<th>Status</th>
-<th>Action</th>
-</tr>
-
-${data.map(x=>`
-
-<tr>
-
-<td>
-${esc(x.note)}
-</td>
-
-<td>
-${esc(x.followup_date)}
-</td>
-
-<td>
-
-<span class="badge ${
-x.done
-?"success"
-:""
-}">
-
-${x.done?"Done":"Pending"}
-
-</span>
-
-</td>
-
-<td>
-
-<div class="row-actions">
-<button
-class="btn small"
-onclick="editFollowup('${x.id}')"
->
-Edit
-</button>
-
-<button
-class="btn small danger"
-onclick="deleteFollowup('${x.id}')"
->
-Delete
-</button>
-
-${
-x.done
-?""
-:
-`
-<button
-class="btn small"
-onclick="completeFollowup('${x.id}')"
->
-Mark done
-</button>
-`
-}
-</div>
+                <td>
+                  <div class="row-actions">
+                    ${
+                      x.done
+                      ? ""
+                      : `<button class="btn small" onclick="completeFollowup('${x.id}')">Mark Done</button>`
+                    }
+                    <button class="btn small" onclick="editFollowup('${x.id}')">Edit</button>
+                    <button class="btn small danger" onclick="deleteFollowup('${x.id}')">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join("")}
+        </table>
+      </div>
+      `
+      : `<div class="empty">No follow ups yet.</div>`
+    }
+  `;
+}</div>
 
 </td>
 

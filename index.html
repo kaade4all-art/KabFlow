@@ -2403,39 +2403,123 @@ async function renderInvoices(){
 }
 
 async function renderFollowups(){
-  const [data,customers]=await Promise.all([
-    rows("followups"),
-    rows("customers")
-  ]);
 
-  const customerMap=new Map(customers.map(c=>[c.id,c]));
+const data=
+await rows("followups");
 
-  document.getElementById("followups").innerHTML=`
-  <div class="sectionhead">
-    <h2>Follow Ups</h2>
-    <button class="btn gold" onclick="openForm('followup')">+ Schedule Follow Up</button>
-  </div>
-  ${data.length?`
-  <div class="tablewrap"><table class="table">
-    <tr><th>Customer</th><th>Note</th><th>Date</th><th>Status</th><th>Action</th></tr>
-    ${data.map(x=>{
-      const customer=customerMap.get(x.customer_id);
-      const customerName=customer?.name || "Customer not found";
-      return `<tr>
-        <td>
-          ${customer ? `<button class="customer-link" onclick="openCustomerDetails('${x.customer_id}')">${esc(customerName)}</button>` : esc(customerName)}
-        </td>
-        <td>${esc(x.note||"")}</td>
-        <td>${esc(x.followup_date||"")}</td>
-        <td><span class="badge ${x.done?"success":""}">${x.done?"Done":"Pending"}</span></td>
-        <td><div class="row-actions">
-          ${!x.done?`<button class="btn small" onclick="completeFollowup('${x.id}')">Mark Done</button>`:""}
-          <button class="btn small" onclick="editFollowup('${x.id}')">Edit</button>
-          <button class="btn small danger" onclick="deleteFollowup('${x.id}')">Delete</button>
-        </div></td>
-      </tr>`;
-    }).join("")}
-  </table></div>`:`<div class="panel empty">No follow ups yet.</div>`}`;
+document.getElementById("followups").innerHTML=`
+
+<div class="sectionhead">
+
+<h2>Follow Ups</h2>
+
+<button
+class="btn gold"
+onclick="openForm('followup')"
+>
++ Schedule Follow Up
+</button>
+
+</div>
+
+${
+data.length
+?
+
+`
+<div class="tablewrap">
+
+<table class="table">
+
+<tr>
+<th>Note</th>
+<th>Date</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+
+${data.map(x=>`
+
+<tr>
+
+<td>
+${esc(x.note)}
+</td>
+
+<td>
+${esc(x.followup_date)}
+</td>
+
+<td>
+
+<span class="badge ${
+x.done
+?"success"
+:""
+}">
+
+${x.done?"Done":"Pending"}
+
+</span>
+
+</td>
+
+<td>
+
+<div class="row-actions">
+<button
+class="btn small"
+onclick="editFollowup('${x.id}')"
+>
+Edit
+</button>
+
+<button
+class="btn small danger"
+onclick="deleteFollowup('${x.id}')"
+>
+Delete
+</button>
+
+${
+x.done
+?""
+:
+`
+<button
+class="btn small"
+onclick="completeFollowup('${x.id}')"
+>
+Mark done
+</button>
+`
+}
+</div>
+
+</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+`
+
+:
+
+`
+<div class="panel empty">
+No follow ups yet.
+</div>
+`
+
+}
+
+`;
+
+
 }
 
 
@@ -2575,43 +2659,74 @@ No tasks yet.
 
 
 async function renderSales(){
-  const [orders,payments]=await Promise.all([
-    rows("orders"),
-    rows("payments")
-  ]);
 
-  // Sales are based on order value. Pending means the unpaid balance on orders,
-  // not payments that merely have a non-Paid status.
-  const totalSales=orders.reduce((total,o)=>total+Number(o.amount||0),0);
-  const totalCollected=payments
-    .filter(p=>String(p.status||"").toLowerCase()==="paid")
-    .reduce((total,p)=>total+Number(p.amount||0),0);
+const payments=
+await rows("payments");
 
-  const pending=Math.max(totalSales-totalCollected,0);
+const paid=
+payments
+.filter(x=>
+String(x.status||"").toLowerCase()==="paid"
+)
+.reduce(
+(total,x)=>total+Number(x.amount||0),
+0
+);
 
-  document.getElementById("sales").innerHTML=`
-  <div class="grid">
-    <div class="card">
-      <div class="muted">Total Sales</div>
-      <div class="stat">${money(totalSales)}</div>
-    </div>
+const pending=
+payments
+.filter(x=>
+String(x.status||"").toLowerCase()!=="paid"
+)
+.reduce(
+(total,x)=>total+Number(x.amount||0),
+0
+);
 
-    <div class="card">
-      <div class="muted">Total Collected</div>
-      <div class="stat">${money(totalCollected)}</div>
-    </div>
+document.getElementById("sales").innerHTML=`
 
-    <div class="card">
-      <div class="muted">Pending</div>
-      <div class="stat">${money(pending)}</div>
-    </div>
-  </div>
+<div class="grid">
 
-  <div class="panel section">
-    <h2>Sales insights</h2>
-    <p class="muted">Total sales come from orders. Pending is the remaining balance after paid payments are deducted.</p>
-  </div>
-  `;
+<div class="card">
+
+<div class="muted">
+Total collected
+</div>
+
+<div class="stat">
+${money(paid)}
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="muted">
+Pending payments
+</div>
+
+<div class="stat">
+${money(pending)}
+</div>
+
+</div>
+
+</div>
+
+<div class="panel section">
+
+<h2>
+Sales insights
+</h2>
+
+<p class="muted">
+Use Payments and Orders to track what has been collected and what is still pending.
+</p>
+
+</div>
+
+`;
+
 }
 
 
@@ -3601,20 +3716,25 @@ async function saveInvoice(){
 }
 
 async function saveTask(){
+  const title=(document.getElementById("f1")?.value||"").trim();
+  const customerId=document.getElementById("f2")?.value||null;
+  const dueDate=document.getElementById("f3")?.value||null;
+  const priority=document.getElementById("f4")?.value||"Normal";
 
-await insert(
-"tasks",
-{
+  if(!title){
+    toast("Please enter a task.","error");
+    return;
+  }
 
-title:f1.value.trim(),
-customer_id:f2.value||null,
-due_date:f3.value||null,
-priority:f4.value,
-status:"To Do"
+  const ok=await insert("tasks",{
+    title:title,
+    customer_id:customerId,
+    due_date:dueDate,
+    priority:priority,
+    status:"To Do"
+  });
 
-}
-);
-
+  if(ok) toast("Task created successfully.","success");
 }
 
 
@@ -4087,18 +4207,57 @@ async function deleteInvoice(id){await dbDelete('invoices',id,'invoice')}
 async function editFollowup(id){const d=(await rows('followups')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Follow Up',`<div class="formrow"><label>Note</label><input id="e1" class="input" value="${esc(d.note||'')}"></div><div class="formrow"><label>Date</label><input id="e2" class="input" type="date" value="${esc(d.followup_date||'')}"></div><button class="btn gold" onclick="dbUpdate('followups','${id}',{note:document.getElementById('e1').value.trim(),followup_date:document.getElementById('e2').value||null})">Save Changes</button>`)}
 async function deleteFollowup(id){await dbDelete('followups',id,'follow up')}
 async function editTask(id){
- const d=(await rows('tasks')).find(x=>x.id===id);
- if(!d)return;
- const customers=await rows('customers');
- openModalHtml('Edit Task',`
- <div class="formrow"><label>Task</label><input id="e1" class="input" value="${esc(d.title||'')}"></div>
- <div class="formrow"><label>Customer</label><select id="e2" class="input"><option value="">No customer</option>${customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
- <div class="formrow"><label>Due Date</label><input id="e3" class="input" type="date" value="${esc(d.due_date||'')}"></div>
- <div class="formrow"><label>Priority</label><select id="e4" class="input"><option>Low</option><option>Normal</option><option>High</option></select></div>
- <button class="btn gold" onclick="dbUpdate('tasks','${id}',{title:e1.value.trim(),customer_id:e2.value||null,due_date:e3.value||null,priority:e4.value})">Save Changes</button>`);
- e2.value=d.customer_id||'';
- e4.value=d.priority||'Normal';
+  const d=(await rows("tasks")).find(x=>x.id===id);
+  if(!d)return;
+
+  const customers=await rows("customers");
+
+  openModalHtml("Edit Task",`
+    <div class="formrow"><label>Task</label>
+      <input id="e1" class="input" value="${esc(d.title||"")}">
+    </div>
+    <div class="formrow"><label>Customer</label>
+      <select id="e2" class="input">
+        <option value="">No customer</option>
+        ${customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("")}
+      </select>
+    </div>
+    <div class="formrow"><label>Due Date</label>
+      <input id="e3" class="input" type="date" value="${esc(d.due_date||"")}">
+    </div>
+    <div class="formrow"><label>Priority</label>
+      <select id="e4" class="input">
+        <option value="Low">Low</option>
+        <option value="Normal">Normal</option>
+        <option value="High">High</option>
+      </select>
+    </div>
+    <button class="btn gold" onclick="saveEditedTask('${id}')">Save Changes</button>
+  `);
+
+  document.getElementById("e2").value=d.customer_id||"";
+  document.getElementById("e4").value=d.priority||"Normal";
 }
+
+async function saveEditedTask(id){
+  const title=(document.getElementById("e1")?.value||"").trim();
+  const customerId=document.getElementById("e2")?.value||null;
+  const dueDate=document.getElementById("e3")?.value||null;
+  const priority=document.getElementById("e4")?.value||"Normal";
+
+  if(!title){
+    toast("Please enter a task.","error");
+    return;
+  }
+
+  await dbUpdate("tasks",id,{
+    title:title,
+    customer_id:customerId,
+    due_date:dueDate,
+    priority:priority
+  });
+}
+
 async function deleteTask(id){await dbDelete('tasks',id,'task')}
 function openModalHtml(title,body){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=body;document.getElementById('modal').classList.add('show')}
 async function startVoice(){

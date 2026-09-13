@@ -3098,11 +3098,14 @@ Customer
 <select
 id="f2"
 class="input"
+onchange="preparePaymentForCustomer(this.value)"
 >
 
 ${await customerOptions()}
 
 </select>
+
+<div id="paymentAutoLink" class="muted" style="margin-top:7px">Select a customer and KabFlow will automatically find the open order or invoice.</div>
 
 </div>
 
@@ -3126,16 +3129,12 @@ class="input"
 Cash
 </option>
 
-<option value="Bank Transfer">
-Bank Transfer
+<option value="Transfer">
+Transfer
 </option>
 
 <option value="POS">
 POS
-</option>
-
-<option value="Card">
-Card
 </option>
 
 <option value="Other">
@@ -3452,9 +3451,10 @@ if(type==="invoice"){
    invoiceInput.readOnly=true;
  }
 }
-if(type==="invoice" && customerId){
+if((type==="invoice" || type==="payment") && customerId){
  const customerSelect=document.getElementById("f2");
  if(customerSelect) customerSelect.value=customerId;
+ if(type==="payment") await preparePaymentForCustomer(customerId);
 }
 
 }
@@ -3532,16 +3532,36 @@ async function savePayment(){
 
  const invoices=await rows("invoices");
  const orders=await rows("orders");
+ const payments=await rows("payments");
 
- const openInvoices=invoices
+ // Automatically choose the customer's first open invoice.
+ let invoice=invoices
   .filter(i=>i.customer_id===customerId && String(i.status||"").toLowerCase()!=="paid")
-  .sort((a,b)=>String(a.due_date||"").localeCompare(String(b.due_date||"")));
- const invoice=openInvoices[0]||null;
+  .sort((a,b)=>String(a.due_date||"").localeCompare(String(b.due_date||"")))
+  .find(i=>Math.max(Number(i.amount||0)-Number(i.amount_paid||0),0)>0)||null;
 
  let orderId=invoice?.order_id||null;
+
+ // If no invoice has an order, automatically choose the customer's latest open order.
  if(!orderId){
-  const customerOrders=orders.filter(o=>o.customer_id===customerId);
-  if(customerOrders.length===1) orderId=customerOrders[0].id;
+  const openOrders=orders
+   .filter(o=>o.customer_id===customerId)
+   .map(o=>{
+    const paid=payments
+     .filter(p=>p.order_id===o.id && String(p.status||"").toLowerCase()==="paid")
+     .reduce((a,p)=>a+Number(p.amount||0),0);
+    return {...o,_balance:Math.max(Number(o.amount||0)-paid,0)};
+   })
+   .filter(o=>o._balance>0)
+   .sort((a,b)=>String(a.created_at||"").localeCompare(String(b.created_at||"")));
+  orderId=openOrders[openOrders.length-1]?.id||null;
+ }
+
+ // If the selected order has an open invoice, link that invoice automatically.
+ if(orderId && !invoice){
+  invoice=invoices
+   .filter(i=>i.customer_id===customerId && i.order_id===orderId && String(i.status||"").toLowerCase()!=="paid")
+   .sort((a,b)=>String(a.due_date||"").localeCompare(String(b.due_date||"")))[0]||null;
  }
 
  const result=await sb.from("payments").insert({
@@ -3559,10 +3579,7 @@ async function savePayment(){
 
  if(String(status).toLowerCase()==="paid"){
   if(invoice){
-   const invoiceTotal=Number(
-    (orderId && orders.find(o=>o.id===orderId)?.amount) ??
-    invoice.amount ?? 0
-   );
+   const invoiceTotal=Number(invoice.amount||0);
    const existingPaid=Number(invoice.amount_paid||0);
    const newPaid=Math.min(existingPaid+amount,invoiceTotal);
    await sb.from("invoices").update({
@@ -3591,7 +3608,48 @@ async function savePayment(){
 
  closeModal();
  await renderAll();
- toast("Payment recorded and linked records updated.","success");
+ toast(orderId||invoice ? "Payment recorded and automatically linked." : "Payment recorded successfully.","success");
+}
+
+async function preparePaymentForCustomer(customerId){
+ if(!customerId)return;
+ try{
+  const invoices=await rows("invoices");
+  const orders=await rows("orders");
+  const payments=await rows("payments");
+
+  let invoice=invoices
+   .filter(i=>i.customer_id===customerId && String(i.status||"").toLowerCase()!=="paid")
+   .sort((a,b)=>String(a.due_date||"").localeCompare(String(b.due_date||"")))
+   .find(i=>Math.max(Number(i.amount||0)-Number(i.amount_paid||0),0)>0)||null;
+
+  let orderId=invoice?.order_id||null;
+  if(!orderId){
+   const openOrders=orders.filter(o=>o.customer_id===customerId).map(o=>{
+    const paid=payments.filter(p=>p.order_id===o.id && String(p.status||"").toLowerCase()==="paid")
+     .reduce((a,p)=>a+Number(p.amount||0),0);
+    return {...o,_balance:Math.max(Number(o.amount||0)-paid,0)};
+   }).filter(o=>o._balance>0).sort((a,b)=>String(a.created_at||"").localeCompare(String(b.created_at||"")));
+   orderId=openOrders[openOrders.length-1]?.id||null;
+  }
+
+  const balance=invoice
+   ? Math.max(Number(invoice.amount||0)-Number(invoice.amount_paid||0),0)
+   : orderId
+    ? Math.max(Number(orders.find(o=>o.id===orderId)?.amount||0)-payments.filter(p=>p.order_id===orderId && String(p.status||"").toLowerCase()==="paid").reduce((a,p)=>a+Number(p.amount||0),0),0)
+    : 0;
+
+  const amountInput=document.getElementById("f1");
+  if(balance>0 && amountInput) amountInput.value=balance;
+  const link=document.getElementById("paymentAutoLink");
+  if(link){
+   link.textContent=invoice
+    ? `Automatically linked to invoice ${invoice.invoice_number||""}`
+    : orderId
+     ? "Automatically linked to the customer's open order"
+     : "No open order or invoice found. Payment will be saved to the customer.";
+  }
+ }catch(e){console.warn("Payment auto link preparation failed",e)}
 }
 
 async function saveTask(){
@@ -3835,7 +3893,7 @@ async function deleteCustomer(id){
 }
 async function editOrder(id){const d=(await rows('orders')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Order',`<div class="formrow"><label>Item</label><input id="e1" class="input" value="${esc(d.item)}"></div><div class="formrow"><label>Amount</label><input id="e2" class="input" type="number" value="${Number(d.amount||0)}"></div><div class="formrow"><label>Order Status</label><select id="e3" class="input"><option>Pending</option><option>Processing</option><option>Ready</option><option>Delivered</option><option>Cancelled</option></select></div><div class="formrow"><label>Payment Status</label><select id="e4" class="input"><option>UNPAID</option><option>PARTIALLY PAID</option><option>PAID</option></select></div><button class="btn gold" onclick="dbUpdate('orders','${id}',{item:e1.value.trim(),amount:Number(e2.value||0),status:e3.value,payment_status:e4.value})">Save Changes</button>`);e3.value=d.status||'Pending';e4.value=d.payment_status||'UNPAID'}
 async function deleteOrder(id){await dbDelete('orders',id,'order')}
-async function editPayment(id){const d=(await rows('payments')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Payment',`<div class="formrow"><label>Amount</label><input id="e1" class="input" type="number" value="${Number(d.amount||0)}"></div><div class="formrow"><label>Method</label><select id="e2" class="input"><option>Cash</option><option>Bank Transfer</option><option>POS</option><option>Card</option><option>Other</option></select></div><div class="formrow"><label>Status</label><select id="e3" class="input"><option>Paid</option><option>Pending</option><option>Failed</option></select></div><button class="btn gold" onclick="dbUpdate('payments','${id}',{amount:Number(e1.value||0),method:e2.value,status:e3.value})">Save Changes</button>`);e2.value=d.method||'Cash';e3.value=d.status||'Paid'}
+async function editPayment(id){const d=(await rows('payments')).find(x=>x.id===id);if(!d)return;openModalHtml('Edit Payment',`<div class="formrow"><label>Amount</label><input id="e1" class="input" type="number" value="${Number(d.amount||0)}"></div><div class="formrow"><label>Method</label><select id="e2" class="input"><option>Transfer</option><option>Cash</option><option>POS</option><option>Other</option></select></div><div class="formrow"><label>Status</label><select id="e3" class="input"><option>Paid</option><option>Pending</option><option>Failed</option></select></div><button class="btn gold" onclick="dbUpdate('payments','${id}',{amount:Number(e1.value||0),method:e2.value,status:e3.value})">Save Changes</button>`);const legacy={"Bank Transfer":"Transfer","Card":"Other"};e2.value=legacy[d.method]||d.method||'Cash';e3.value=d.status||'Paid'}
 async function deletePayment(id){await dbDelete('payments',id,'payment')}
 async function viewInvoice(id){
  const inv=(await rows("invoices")).find(x=>x.id===id);

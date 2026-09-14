@@ -707,6 +707,7 @@ button{
 
 .invoice-actions{display:flex;gap:6px;flex-wrap:wrap}
 .invoice-print-note{font-size:13px;color:#697386;margin-top:8px}
+
 .linkbtn{
   background:none;
   border:0;
@@ -2434,9 +2435,11 @@ async function renderFollowups(){
             <th>Status</th>
             <th>Action</th>
           </tr>
+
           ${data.map(x=>{
             const customer=customerMap.get(x.customer_id);
             const customerName=customer?.name||"Customer not linked";
+
             return `
               <tr>
                 <td>
@@ -2446,16 +2449,24 @@ async function renderFollowups(){
                     : `<span class="muted">${esc(customerName)}</span>`
                   }
                 </td>
+
                 <td>${esc(x.note||"")}</td>
+
                 <td>${esc(x.followup_date||"")}</td>
+
                 <td>
                   <span class="badge ${x.done?"success":""}">
                     ${x.done?"Done":"Pending"}
                   </span>
                 </td>
+
                 <td>
                   <div class="row-actions">
-                    ${x.done?"":`<button class="btn small" onclick="completeFollowup('${x.id}')">Mark Done</button>`}
+                    ${
+                      x.done
+                      ? ""
+                      : `<button class="btn small" onclick="completeFollowup('${x.id}')">Mark Done</button>`
+                    }
                     <button class="btn small" onclick="editFollowup('${x.id}')">Edit</button>
                     <button class="btn small danger" onclick="deleteFollowup('${x.id}')">Delete</button>
                   </div>
@@ -2469,6 +2480,32 @@ async function renderFollowups(){
       : `<div class="empty">No follow ups yet.</div>`
     }
   `;
+}</div>
+
+</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+`
+
+:
+
+`
+<div class="panel empty">
+No follow ups yet.
+</div>
+`
+
+}
+
+`;
+
+
 }
 
 
